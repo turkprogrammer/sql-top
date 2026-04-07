@@ -28,8 +28,15 @@ func TestHandleKey_EnterShowsExplain(t *testing.T) {
 		t.Fatal("не удалось привести модель к *Model")
 	}
 
+	// Ждём завершения горутины (showExplainModal выполняется асинхронно)
+	time.Sleep(100 * time.Millisecond)
+
 	// Проверяем, что открылся explain modal
-	if !m.showExplain {
+	m.mu.Lock()
+	showExplain := m.showExplain
+	m.mu.Unlock()
+
+	if !showExplain {
 		t.Error("ожидалось showExplain = true")
 	}
 }
@@ -51,8 +58,15 @@ func TestHandleKey_YCopiesQuery(t *testing.T) {
 		t.Fatal("не удалось привести модель к *Model")
 	}
 
+	// Ждём завершения горутины (copyQueryToClipboard выполняется асинхронно)
+	time.Sleep(100 * time.Millisecond)
+
 	// Проверяем, что появился copy confirm
-	if !m.copyConfirm {
+	m.mu.Lock()
+	copyConfirm := m.copyConfirm
+	m.mu.Unlock()
+
+	if !copyConfirm {
 		t.Error("ожидалось copyConfirm = true")
 	}
 }

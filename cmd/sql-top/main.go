@@ -18,6 +18,9 @@ import (
 	"github.com/turkprogrammer/sql-top/internal/ui"
 )
 
+// Version устанавливается при сборке через -ldflags "-X main.Version=x.y.z"
+var Version = "dev"
+
 // Config содержит конфигурацию приложения
 type Config struct {
 	DSN    string
@@ -42,12 +45,14 @@ func createFlagSet() (*flag.FlagSet, *string) {
 	dsn := flagSet.String("dsn", "", "Database connection string (PostgreSQL, MySQL, or ClickHouse)")
 
 	flagSet.Usage = func() {
-		fmt.Println("SQL-Top: Live Query Monitor for PostgreSQL, MySQL & ClickHouse")
+		fmt.Printf("SQL-Top v%s: Live Query Monitor for PostgreSQL, MySQL & ClickHouse\n", Version)
 		fmt.Println()
 		fmt.Println("Usage: sql-top [options] [dsn]")
 		fmt.Println()
 		fmt.Println("Options:")
 		flagSet.PrintDefaults()
+		fmt.Println("  -version")
+		fmt.Println("    	Show version information")
 		fmt.Println()
 		fmt.Println("Supported databases:")
 		fmt.Println("  PostgreSQL:  postgres://user:pass@host:5432/db")
@@ -59,6 +64,7 @@ func createFlagSet() (*flag.FlagSet, *string) {
 		fmt.Println("  sql-top mysql://user:pass@localhost:3306/mydb")
 		fmt.Println("  sql-top clickhouse://user:pass@localhost:9000/mydb")
 		fmt.Println("  sql-top -dsn postgres://user:pass@localhost:5432/mydb")
+		fmt.Println("  sql-top -version")
 	}
 
 	return flagSet, dsn
@@ -74,6 +80,11 @@ func parseFlagSet(flagSet *flag.FlagSet, args []string, dsn *string) error {
 	for i, arg := range args {
 		if arg == "--help" || arg == "-h" {
 			flagSet.Usage()
+			os.Exit(0)
+		}
+
+		if arg == "--version" || arg == "-version" {
+			fmt.Printf("sql-top version %s\n", Version)
 			os.Exit(0)
 		}
 

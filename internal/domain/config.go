@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"os"
+	"time"
+)
 
 // Конфигурационные константы для подключения к БД
 const (
@@ -40,9 +43,6 @@ const (
 	// DefaultTableColumnWidth — ширина колонки таблицы по умолчанию
 	DefaultTableColumnWidth = 120
 
-	// ClipboardFileName — временный файл для копирования запроса
-	ClipboardFileName = "clipboard.tmp"
-
 	// DefaultModalWidth — ширина модального окна по умолчанию
 	DefaultModalWidth = 80
 
@@ -53,17 +53,59 @@ const (
 	DefaultQueryTruncateLength = 60
 )
 
-// Константы timeout
+// Константы timeout (значения по умолчанию)
 const (
-	// ClipboardConfirmTimeout — время подтверждения копирования
-	ClipboardConfirmTimeout = 2 * time.Second
+	// DefaultClipboardConfirmTimeout — время подтверждения копирования
+	DefaultClipboardConfirmTimeout = 2 * time.Second
 
-	// PingInterval — интервал ping проверки
-	PingInterval = 5 * time.Second
+	// DefaultPingInterval — интервал ping проверки
+	DefaultPingInterval = 5 * time.Second
 
-	// KillQueryTimeout — timeout для kill query
-	KillQueryTimeout = 5 * time.Second
+	// DefaultKillQueryTimeout — timeout для kill query
+	DefaultKillQueryTimeout = 5 * time.Second
 
-	// ExplainQueryTimeout — timeout для explain query
-	ExplainQueryTimeout = 10 * time.Second
+	// DefaultExplainQueryTimeout — timeout для explain query
+	DefaultExplainQueryTimeout = 10 * time.Second
 )
+
+// GetClipboardConfirmTimeout возвращает настраиваемый timeout для подтверждения копирования.
+// Можно переопределить через env: SQLTOP_CLIPBOARD_TIMEOUT
+func GetClipboardConfirmTimeout() time.Duration {
+	return getEnvDuration("SQLTOP_CLIPBOARD_TIMEOUT", DefaultClipboardConfirmTimeout)
+}
+
+// GetPingInterval возвращает настраиваемый интервал ping проверки.
+// Можно переопределить через env: SQLTOP_PING_INTERVAL
+func GetPingInterval() time.Duration {
+	return getEnvDuration("SQLTOP_PING_INTERVAL", DefaultPingInterval)
+}
+
+// GetKillQueryTimeout возвращает настраиваемый timeout для kill query.
+// Можно переопределить через env: SQLTOP_KILL_TIMEOUT
+func GetKillQueryTimeout() time.Duration {
+	return getEnvDuration("SQLTOP_KILL_TIMEOUT", DefaultKillQueryTimeout)
+}
+
+// GetExplainQueryTimeout возвращает настраиваемый timeout для explain query.
+// Можно переопределить через env: SQLTOP_EXPLAIN_TIMEOUT
+func GetExplainQueryTimeout() time.Duration {
+	return getEnvDuration("SQLTOP_EXPLAIN_TIMEOUT", DefaultExplainQueryTimeout)
+}
+
+// Для обратной совместимости - используем геттеры
+var (
+	ClipboardConfirmTimeout = GetClipboardConfirmTimeout()
+	PingInterval            = GetPingInterval()
+	KillQueryTimeout        = GetKillQueryTimeout()
+	ExplainQueryTimeout     = GetExplainQueryTimeout()
+)
+
+// getEnvDuration читает duration из переменной окружения или возвращает значение по умолчанию.
+func getEnvDuration(key string, defaultValue time.Duration) time.Duration {
+	if val := os.Getenv(key); val != "" {
+		if d, err := time.ParseDuration(val); err == nil {
+			return d
+		}
+	}
+	return defaultValue
+}

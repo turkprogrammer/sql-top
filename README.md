@@ -5,7 +5,7 @@
 [![Go Version](https://img.shields.io/badge/go-1.25.0-blue.svg)](https://golang.org)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
-[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-44_unit-yellow.svg)]()
 
 ## 📖 Оглавление
 
@@ -63,12 +63,14 @@
 | :--- |:-----------------------------------| :--- | :--- |
 | **Тип инструмента** | **TUI (Terminal UI)**              | TUI (Terminal UI) | **GUI (Desktop IDE)** |
 | **Язык / Стек** | **Go (Single Binary)**             | Python (pip deps) | **Java / Eclipse** |
-| **Портативность** | ✅ **Отличная** (6MB, zero deps)    | ⚠️ Средняя (нужен Python/Libs) | 📦 **Низкая** (500MB+ installer) |
-| **Время запуска** | ⏱️ **Мгновенно** (<100ms)          | ⏱️ Быстро (<500ms) | ⏳ **Долго** (5–15 сек) |
+| **Портативность** | ✅ **Отличная** (~21MB, zero deps)    | ⚠️ Средняя (нужен Python/Libs) | 📦 **Низкая** (500MB+ installer) |
+| **Время запуска** | ⏱️ **Мгновенно** (~70ms)          | ⏱️ Быстро (<500ms) | ⏳ **Долго** (5–15 сек) |
 | **Поддержка СУБД** | 🔌 **PG, MySQL, ClickHouse**       | ❌ Только PostgreSQL | ✅ **Все популярные** |
 | **Безопасность** | 🛡️ **Safe EXPLAIN** (No ANALYZE)  | ❌ Нет EXPLAIN в TUI | ⚠️ **Опасно** (ANALYZE по умолчанию) |
 | **Нагрузка на БД** | 📉 **Минимальная** (оптимизирован) | Минимальная | 📊 **Зависит от плагинов** |
 | **Киллер-фича** | 💡 **Delta Highlighting**          | Simple Monitor | **Визуальный конструктор** |
+
+**Примечание:** Измерения SQL-Top выполнены 07.04.2026 на Windows (Go 1.25.0). Время запуска: среднее из 5 запусков. Размер бинарника: без сжатия UPX. Сравнение с конкурентами основано на публичной документации.
 
 ---
 
@@ -316,13 +318,26 @@ func main() {
 
 ### Переменные окружения
 
-| Переменная | Значение | Описание |
-|------------|----------|----------|
-| `SQLTOP_DEBUG` | `1` | Включает debug-логирование |
+| Переменная | Значение по умолчанию | Описание |
+|------------|----------------------|----------|
+| `SQLTOP_DEBUG` | `0` | Включает debug-логирование (установите `1`) |
+| `SQLTOP_KILL_TIMEOUT` | `5s` | Timeout для завершения запроса (kill query) |
+| `SQLTOP_EXPLAIN_TIMEOUT` | `10s` | Timeout для получения плана выполнения (EXPLAIN) |
+| `SQLTOP_PING_INTERVAL` | `5s` | Интервал проверки подключения к БД |
+| `SQLTOP_CLIPBOARD_TIMEOUT` | `2s` | Время отображения подтверждения копирования |
 
 ```bash
 # Включить debug-режим
 export SQLTOP_DEBUG=1
+
+# Увеличить таймауты для медленной БД
+export SQLTOP_KILL_TIMEOUT=30s
+export SQLTOP_EXPLAIN_TIMEOUT=60s
+
+# Изменить интервал ping
+export SQLTOP_PING_INTERVAL=10s
+
+# Запуск с настройками
 sql-top postgres://user:pass@localhost:5432/db
 ```
 
@@ -456,7 +471,9 @@ internal/
     └── model_test.go        # 17 тестов
 ```
 
-**Итого:** 44 теста, 100% покрытие критичных путей.
+**Итого:** 44 unit-теста, покрытие критичных путей ~50%.
+
+**Примечание:** Текущие тесты покрывают изолированные компоненты (domain, UI логика, конструкторы адаптеров). Интеграционные тесты с реальными БД находятся в разработке.
 
 ---
 

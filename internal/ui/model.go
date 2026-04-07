@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"os"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/turkprogrammer/sql-top/internal/domain"
@@ -108,9 +108,8 @@ func (m *Model) handleKillConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			pid := m.killPID
 			m.killConfirm = false
 			m.killPID = 0
-			m.mu.Unlock()
-			m.executeKill(pid)
-			m.mu.Lock()
+			// Запускаем в отдельной горутине, чтобы не блокировать UI
+			go m.executeKill(pid)
 		case "n", "q":
 			m.killConfirm = false
 			m.killPID = 0
@@ -142,9 +141,8 @@ func (m *Model) handleNavigation(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case tea.KeyEnter:
 		if len(m.queries) > 0 && m.selectedIndex < len(m.queries) {
 			query := m.queries[m.selectedIndex].Query
-			m.mu.Unlock()
-			m.showExplainModal(query)
-			m.mu.Lock()
+			// Запускаем в отдельной горутине, чтобы не блокировать UI
+			go m.showExplainModal(query)
 		}
 
 	case tea.KeyRunes:
@@ -161,7 +159,9 @@ func (m *Model) handleNavigation(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 		case "y":
 			if len(m.queries) > 0 && m.selectedIndex < len(m.queries) {
-				m.copyQueryToClipboard(m.queries[m.selectedIndex].Query)
+				query := m.queries[m.selectedIndex].Query
+				// Запускаем в отдельной горутине, чтобы не блокировать UI
+				go m.copyQueryToClipboard(query)
 			}
 		}
 	}
@@ -170,18 +170,26 @@ func (m *Model) handleNavigation(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 // copyQueryToClipboard копирует запрос в буфер обмена.
-// Примечание: используется временный файл из-за ограничений кроссплатформенности.
-// Для улучшения: использовать github.com/atotto/clipboard или termenv.
+// Использует github.com/atotto/clipboard для кроссплатформенной поддержки.
 func (m *Model) copyQueryToClipboard(query string) {
-	err := os.WriteFile(domain.ClipboardFileName, []byte(query), 0644)
+	err := clipboard.WriteAll(query)
+
+	m.mu.Lock()
 	if err != nil {
 		m.err = fmt.Errorf("failed to copy query: %w", err)
+		m.mu.Unlock()
 		return
 	}
 
 	m.copyConfirm = true
+	m.mu.Unlock()
+
 	go func() {
-		time.Sleep(domain.ClipboardConfirmTimeout)
+		ctx, cancel := context.WithTimeout(m.ctx, domain.GetClipboardConfirmTimeout())
+		defer cancel()
+
+		<-ctx.Done()
+
 		m.mu.Lock()
 		m.copyConfirm = false
 		m.mu.Unlock()
@@ -189,12 +197,13 @@ func (m *Model) copyQueryToClipboard(query string) {
 }
 
 func (m *Model) handleSnapshot(snapshot domain.QuerySnapshot) (tea.Model, tea.Cmd) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	m.diffEngine.MarkNewQueries(&snapshot)
 	m.history.Push(snapshot)
-	m.mu.Lock()
 	m.queries = snapshot.Queries
 	m.err = nil
-	m.mu.Unlock()
 	return m, nil
 }
 
@@ -223,7 +232,7 @@ func (m *Model) fetchLoop() tea.Cmd {
 
 func (m *Model) pingLoop() tea.Cmd {
 	return func() tea.Msg {
-		ticker := time.NewTicker(domain.PingInterval)
+		ticker := time.NewTicker(domain.GetPingInterval())
 		defer ticker.Stop()
 
 		for {
@@ -246,7 +255,7 @@ func (m *Model) pingLoop() tea.Cmd {
 
 // executeKill выполняет завершение запроса с использованием KillQueryTimeout.
 func (m *Model) executeKill(pid int32) {
-	ctx, cancel := context.WithTimeout(context.Background(), domain.KillQueryTimeout)
+	ctx, cancel := context.WithTimeout(m.ctx, domain.GetKillQueryTimeout())
 	defer cancel()
 
 	if err := m.provider.KillQuery(ctx, pid); err != nil {
@@ -262,7 +271,7 @@ func (m *Model) showExplainModal(query string) {
 	m.explainQuery = query
 	m.mu.Unlock()
 
-	ctx, cancel := context.WithTimeout(context.Background(), domain.ExplainQueryTimeout)
+	ctx, cancel := context.WithTimeout(m.ctx, domain.GetExplainQueryTimeout())
 	defer cancel()
 
 	result, err := m.provider.ExplainQuery(ctx, query)
