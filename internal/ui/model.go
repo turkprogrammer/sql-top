@@ -15,6 +15,7 @@ import (
 	"github.com/turkprogrammer/sql-top/internal/history"
 )
 
+// Model представляет модель TUI для отображения активных запросов.
 type Model struct {
 	provider      domain.DBProvider
 	diffEngine    *domain.DiffEngine
@@ -37,6 +38,7 @@ type Model struct {
 	logger        *slog.Logger
 }
 
+// NewModel создаёт новую модель TUI с указанным провайдером БД и логгером.
 func NewModel(provider domain.DBProvider, logger *slog.Logger) *Model {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &Model{
@@ -50,6 +52,7 @@ func NewModel(provider domain.DBProvider, logger *slog.Logger) *Model {
 	}
 }
 
+// Init инициализирует модель, запуская циклы опроса и ping.
 func (m *Model) Init() tea.Cmd {
 	return tea.Batch(
 		m.fetchLoop(),
@@ -57,6 +60,7 @@ func (m *Model) Init() tea.Cmd {
 	)
 }
 
+// Update обрабатывает входящие сообщения TUI и обновляет состояние модели.
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -220,8 +224,11 @@ func (m *Model) fetchLoop() tea.Cmd {
 			case <-ticker.C:
 				snapshot, err := m.provider.GetActiveQueries(m.ctx)
 				if err != nil {
-					m.logger.Error("failed to fetch active queries", "error", err)
 					return fmt.Errorf("fetch queries: %w", err)
+				}
+				if snapshot == nil {
+					m.logger.Warn("nil snapshot from provider")
+					return fmt.Errorf("fetch queries: nil snapshot")
 				}
 				m.logger.Debug("fetched queries", "count", len(snapshot.Queries))
 				return *snapshot
@@ -242,7 +249,6 @@ func (m *Model) pingLoop() tea.Cmd {
 				return nil
 			case <-ticker.C:
 				if err := m.provider.Ping(m.ctx); err != nil {
-					m.logger.Error("failed to ping database", "error", err)
 					return fmt.Errorf("ping database: %w", err)
 				}
 				m.mu.Lock()
@@ -282,16 +288,31 @@ func (m *Model) showExplainModal(query string) {
 	if err != nil {
 		m.err = fmt.Errorf("failed to explain: %w", err)
 		m.showExplain = false
+	} else if result == nil {
+		m.err = fmt.Errorf("explain returned nil result")
+		m.showExplain = false
 	} else {
 		m.explainPlan = result.Plan
 		m.showExplain = true
 	}
 }
 
+// View рендерит текущее состояние TUI в строку.
+// Снимает защищённые поля под мьютексом, чтобы избежать гонки с фоновыми горутинами.
 func (m *Model) View() string {
+	m.mu.Lock()
+	connected := m.connected
+	showExplain := m.showExplain
+	explainPlan := m.explainPlan
+	killConfirm := m.killConfirm
+	killPID := m.killPID
+	copyConfirm := m.copyConfirm
+	err := m.err
+	m.mu.Unlock()
+
 	var sb strings.Builder
 
-	if !m.connected {
+	if !connected {
 		sb.WriteString(StyleWarning.Render("Connecting..."))
 		sb.WriteString("\n")
 		return sb.String()
@@ -303,35 +324,29 @@ func (m *Model) View() string {
 	sb.WriteString("\n")
 	sb.WriteString(renderFooter())
 
-	if m.showExplain {
-		sb.WriteString(m.renderExplainModal())
+	if showExplain {
+		sb.WriteString(m.renderExplainModal(explainPlan))
 	}
 
-	if m.killConfirm {
-		sb.WriteString(m.renderKillConfirm())
+	if killConfirm {
+		sb.WriteString(m.renderKillConfirm(killPID))
 	}
 
-	if m.copyConfirm {
+	if copyConfirm {
 		sb.WriteString("\n")
 		sb.WriteString(StyleActive.Render("Query copied to clipboard"))
 	}
 
-	if m.err != nil {
+	if err != nil {
 		sb.WriteString("\n")
-		sb.WriteString(StyleError.Render(fmt.Sprintf("Error: %v", m.err)))
+		sb.WriteString(StyleError.Render(fmt.Sprintf("Error: %v", err)))
 	}
 
 	return sb.String()
 }
 
 func renderHeader() string {
-	header := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("15")).
-		Background(lipgloss.Color("236")).
-		Padding(0, 1)
-
-	return header.Render(" SQL-Top | Live Query Monitor ")
+	return styleHeaderBar.Render(" SQL-Top | Live Query Monitor ")
 }
 
 // renderTable рендерит таблицу запросов
@@ -392,7 +407,7 @@ func (m *Model) renderTableRow(q domain.Query, index int) string {
 
 	return fmt.Sprintf("%-6d %-10s %-10s %-8s %-10s %s",
 		q.PID,
-		truncate(q.Usename, 10),
+		truncate(q.Username, 10),
 		truncate(q.Datname, 10),
 		style.Render(duration),
 		waitEvent,
@@ -411,7 +426,7 @@ func truncateQuery(query string) string {
 // getRowStyle возвращает стиль для строки таблицы
 func getRowStyle(q domain.Query, selected bool) lipgloss.Style {
 	if selected {
-		return lipgloss.NewStyle().Background(lipgloss.Color("240"))
+		return styleSelected
 	}
 
 	// Проверяем состояние ожидания
@@ -426,7 +441,7 @@ func getRowStyle(q domain.Query, selected bool) lipgloss.Style {
 	case "idle", "idle in transaction":
 		return StyleIdle
 	default:
-		return lipgloss.NewStyle()
+		return styleDefault
 	}
 }
 
@@ -451,7 +466,7 @@ func renderFooter() string {
 	return helpStyle.Render("↑↓ Navigate | Enter EXPLAIN | K Kill | y Copy | q Quit")
 }
 
-func (m *Model) renderExplainModal() string {
+func (m *Model) renderExplainModal(plan string) string {
 	width := domain.DefaultModalWidth
 	height := domain.DefaultModalHeight
 	if m.width > 0 {
@@ -467,15 +482,15 @@ func (m *Model) renderExplainModal() string {
 		Width(width).
 		Height(height)
 
-	content := StyleModalTitle.Render("EXPLAIN (JSON)\n\n") + m.explainPlan
+	content := StyleModalTitle.Render("EXPLAIN (JSON)\n\n") + plan
 
 	return "\n" + modalStyle.Render(content) + "\n" + helpStyle.Render("Press ESC to close")
 }
 
-func (m *Model) renderKillConfirm() string {
+func (m *Model) renderKillConfirm(pid int32) string {
 	return fmt.Sprintf("\n%s\n",
 		StyleKillConfirm.Render(
-			fmt.Sprintf(" Terminate backend PID %d? (y/n) ", m.killPID),
+			fmt.Sprintf(" Terminate backend PID %d? (y/n) ", pid),
 		),
 	)
 }

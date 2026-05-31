@@ -8,14 +8,17 @@ import (
 	"github.com/turkprogrammer/sql-top/internal/domain"
 )
 
+// Explainer реализует интерфейс QueryExplainer для MySQL.
 type Explainer struct {
 	connector *Connector
 }
 
+// NewExplainer создаёт новый explainer для MySQL.
 func NewExplainer(connector *Connector) *Explainer {
 	return &Explainer{connector: connector}
 }
 
+// ExplainQuery возвращает план выполнения запроса для MySQL.
 func (e *Explainer) ExplainQuery(ctx context.Context, query string) (string, error) {
 	// Обрезаем длинный запрос для безопасного отображения в EXPLAIN
 	safeQuery := domain.SanitizeQuery(query, domain.MaxQueryPreviewLength, false)

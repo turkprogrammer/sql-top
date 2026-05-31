@@ -14,7 +14,11 @@ type RingBuffer struct {
 }
 
 // NewRingBuffer создаёт новый кольцевой буфер с указанной ёмкостью.
+// Если capacity <= 0, устанавливается ёмкость по умолчанию (1).
 func NewRingBuffer(capacity int) *RingBuffer {
+	if capacity <= 0 {
+		capacity = 1
+	}
 	return &RingBuffer{
 		buffer:   make([]domain.QuerySnapshot, capacity),
 		capacity: capacity,
@@ -49,12 +53,14 @@ func (rb *RingBuffer) GetAll() []domain.QuerySnapshot {
 
 // Latest возвращает последний добавленный снапшот.
 // Возвращает nil, если буфер пуст.
+// Возвращает defensive copy для защиты внутреннего состояния.
 func (rb *RingBuffer) Latest() *domain.QuerySnapshot {
 	if rb.count == 0 {
 		return nil
 	}
 	idx := (rb.index - 1 + rb.capacity) % rb.capacity
-	return &rb.buffer[idx]
+	snap := rb.buffer[idx]
+	return &snap
 }
 
 // Len возвращает количество снапшотов в буфере.

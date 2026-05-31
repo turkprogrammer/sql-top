@@ -49,6 +49,7 @@ func (a *BaseAdapter) Logger() *slog.Logger {
 
 // NewBaseAdapter создаёт базовый адаптер с зависимостями.
 // logger передаётся через DI для соблюдения принципов Clean Architecture.
+// Все параметры должны быть не nil — поведение с nil параметрами не определено.
 func NewBaseAdapter(
 	connector DBConnector,
 	fetcher QueryFetcher,
@@ -65,7 +66,7 @@ func NewBaseAdapter(
 
 // Connect подключается к БД через connector.
 func (a *BaseAdapter) Connect(ctx context.Context, dsn string) error {
-	a.logger.Debug("connecting to database", "dsn", sanitizeDSN(dsn))
+	a.logger.Debug("connecting to database", "dsn", domain.SanitizeDSN(dsn))
 	return a.connector.Connect(ctx, dsn)
 }
 
@@ -89,21 +90,4 @@ func (a *BaseAdapter) ExplainQuery(ctx context.Context, query string) (*domain.E
 		return nil, err
 	}
 	return &domain.ExplainResult{Plan: plan}, nil
-}
-
-// sanitizeDSN скрывает пароль из DSN для безопасного логирования.
-func sanitizeDSN(dsn string) string {
-	// Простая эвристика: скрываем всё после :@
-	for i := 0; i < len(dsn); i++ {
-		if dsn[i] == ':' && i+1 < len(dsn) && dsn[i+1] != '/' {
-			j := i + 1
-			for j < len(dsn) && dsn[j] != '@' {
-				j++
-			}
-			if j < len(dsn) {
-				return dsn[:i+1] + "****" + dsn[j:]
-			}
-		}
-	}
-	return dsn
 }

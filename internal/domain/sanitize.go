@@ -1,5 +1,7 @@
 package domain
 
+import "strings"
+
 // MaxQueryPreviewLength — максимальная длина запроса для предпросмотра
 const MaxQueryPreviewLength = 500
 
@@ -16,4 +18,15 @@ func SanitizeQuery(query string, maxLength int, addEllipsis bool) string {
 	}
 
 	return query[:maxLength]
+}
+
+// SanitizeDSN скрывает пароль из DSN для безопасного логирования.
+func SanitizeDSN(dsn string) string {
+	if idx := strings.Index(dsn, "://"); idx != -1 {
+		rest := dsn[idx+3:]
+		if atIdx := strings.Index(rest, "@"); atIdx != -1 {
+			return dsn[:idx+3] + "***@" + rest[atIdx+1:]
+		}
+	}
+	return dsn
 }

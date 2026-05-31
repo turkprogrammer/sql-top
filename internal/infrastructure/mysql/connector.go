@@ -9,14 +9,17 @@ import (
 	"github.com/turkprogrammer/sql-top/internal/domain"
 )
 
+// Connector управляет подключением к MySQL через database/sql.
 type Connector struct {
 	db *sql.DB
 }
 
+// NewConnector создаёт новый MySQL connector.
 func NewConnector() *Connector {
 	return &Connector{}
 }
 
+// Connect устанавливает подключение к MySQL с настройками из domain.Default*.
 func (c *Connector) Connect(ctx context.Context, dsn string) error {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
@@ -29,6 +32,7 @@ func (c *Connector) Connect(ctx context.Context, dsn string) error {
 	db.SetConnMaxLifetime(domain.DefaultConnMaxLifetime)
 
 	if err := db.PingContext(ctx); err != nil {
+		db.Close()
 		return fmt.Errorf("failed to ping mysql: %w", err)
 	}
 
@@ -36,6 +40,7 @@ func (c *Connector) Connect(ctx context.Context, dsn string) error {
 	return nil
 }
 
+// Close закрывает подключение к MySQL.
 func (c *Connector) Close(ctx context.Context) error {
 	if c.db != nil {
 		return c.db.Close()

@@ -15,7 +15,12 @@ func NewDiffEngine() *DiffEngine {
 
 // MarkNewQueries помечает новые запросы в снапшоте флагом IsNew.
 // Сравнивает PID запросов с предыдущим снапшотом.
+// Если snapshot равен nil, функция ничего не делает.
 func (d *DiffEngine) MarkNewQueries(snapshot *QuerySnapshot) {
+	if snapshot == nil {
+		return
+	}
+
 	currentPIDs := make(map[int32]struct{})
 
 	for i := range snapshot.Queries {

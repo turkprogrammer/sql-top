@@ -198,7 +198,7 @@ func TestRenderTableRow(t *testing.T) {
 	model.queries = []domain.Query{
 		{
 			PID:      12345,
-			Usename:  "postgres",
+			Username:  "postgres",
 			Datname:  "testdb",
 			State:    "active",
 			Query:    "SELECT * FROM users WHERE id = 1",
@@ -378,10 +378,6 @@ type mockProvider struct{}
 
 func (m *mockProvider) Connect(ctx context.Context, dsn string) error {
 	return nil
-}
-
-func (m *mockProvider) FetchActiveQueries(ctx context.Context) (*domain.QuerySnapshot, error) {
-	return &domain.QuerySnapshot{Queries: []domain.Query{}}, nil
 }
 
 func (m *mockProvider) GetActiveQueries(ctx context.Context) (*domain.QuerySnapshot, error) {

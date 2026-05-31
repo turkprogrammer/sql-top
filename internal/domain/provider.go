@@ -8,7 +8,7 @@ import (
 // Query представляет активный запрос в СУБД.
 type Query struct {
 	PID           int32
-	Usename       string
+	Username       string
 	Datname       string
 	State         string
 	WaitEventType string

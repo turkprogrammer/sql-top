@@ -92,14 +92,6 @@ func GetExplainQueryTimeout() time.Duration {
 	return getEnvDuration("SQLTOP_EXPLAIN_TIMEOUT", DefaultExplainQueryTimeout)
 }
 
-// Для обратной совместимости - используем геттеры
-var (
-	ClipboardConfirmTimeout = GetClipboardConfirmTimeout()
-	PingInterval            = GetPingInterval()
-	KillQueryTimeout        = GetKillQueryTimeout()
-	ExplainQueryTimeout     = GetExplainQueryTimeout()
-)
-
 // getEnvDuration читает duration из переменной окружения или возвращает значение по умолчанию.
 func getEnvDuration(key string, defaultValue time.Duration) time.Duration {
 	if val := os.Getenv(key); val != "" {

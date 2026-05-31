@@ -247,9 +247,10 @@ sql-top/
 │       └── main.go          # Точка входа, DI, graceful shutdown
 ├── internal/
 │   ├── domain/
-│   │   ├── provider.go      # Интерфейсы (ports)
-│   │   ├── sanitize.go      # Санитизация запросов
+│   │   ├── provider.go      # Интерфейсы (ports) и типы
+│   │   ├── sanitize.go      # Санитизация запросов и DSN
 │   │   ├── diff.go          # Diff-движок для запросов
+│   │   ├── query.go         # Тип WaitEventType и методы
 │   │   └── config.go        # Константы конфигурации
 │   ├── infrastructure/
 │   │   ├── base/
@@ -258,7 +259,7 @@ sql-top/
 │   │   ├── mysql/
 │   │   └── clickhouse/
 │   ├── history/
-│   │   └── ring_buffer.go   # Кольцевой буфер истории
+│   │   └── ringbuffer.go    # Кольцевой буфер истории
 │   └── ui/
 │       ├── model.go         # TUI модель (bubbletea)
 │       ├── styles.go        # Стили lipgloss
@@ -479,32 +480,28 @@ internal/
 
 ## ✅ Соответствие стандартам
 
-### Qwen.md Principles
+### Code Quality
 
-SQL-Top полностью соответствует принципам **Qwen.md**:
+SQL-Top соответствует современным Go-практикам:
 
 | Принцип | Статус | Описание |
 |---------|--------|----------|
 | **KISS** | ✅ | Простая архитектура без избыточных абстракций |
 | **YAGNI** | ✅ | Нет преждевременной оптимизации |
 | **SOLID** | ✅ | Интерфейсы в domain, реализация в infrastructure |
-| **Clean Architecture** | ✅ | Hexagonal + Dependency Injection |
-| **TDD** | ✅ | 44 теста покрывают критичные пути |
-| **Structured Logging** | ✅ | slog с контекстом во всех слоях |
-| **Error Handling** | ✅ | Все ошибки обёрнуты с `%w` |
-| **Graceful Shutdown** | ✅ | Корректное завершение горутин и соединений |
+| **Hexagonal Architecture** | ✅ | Ports & Adapters + Dependency Injection |
+| **Error Handling** | ✅ | Все ошибки обёрнуты с `%w`, `errors.Is()` для сравнений |
+| **Graceful Shutdown** | ✅ | Context cancellation + signal handling |
 | **No Globals** | ✅ | DI через параметры, нет синглтонов |
 | **Functions ≤50 LOC** | ✅ | Все функции ≤50 строк |
+| **Defensive Coding** | ✅ | Nil guards, resource leak prevention, defensive copies |
+| **Structured Logging** | ✅ | `log/slog` во всех слоях, DSN маскируется |
 
 ### Code Quality Metrics
 
 ```bash
-# Функции ≤50 строк
-find . -name "*.go" -exec wc -l {} + | sort -n | tail
-
 # 0 warnings
-go vet ./...           # ✅ 0 warnings
-staticcheck ./...      # ✅ 0 warnings
+go vet ./...           # ✅ чисто
 gofmt -l .             # ✅ чисто
 
 # Тесты

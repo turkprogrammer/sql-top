@@ -11,14 +11,17 @@ import (
 	"github.com/turkprogrammer/sql-top/internal/domain"
 )
 
+// Connector управляет подключением к ClickHouse.
 type Connector struct {
 	conn driver.Conn
 }
 
+// NewConnector создаёт новый ClickHouse connector.
 func NewConnector() *Connector {
 	return &Connector{}
 }
 
+// Connect устанавливает подключение к ClickHouse с настройками из DSN.
 func (c *Connector) Connect(ctx context.Context, dsn string) error {
 	opts, err := parseDSN(dsn)
 	if err != nil {
@@ -31,6 +34,7 @@ func (c *Connector) Connect(ctx context.Context, dsn string) error {
 	}
 
 	if err := conn.Ping(ctx); err != nil {
+		conn.Close()
 		return fmt.Errorf("failed to ping clickhouse: %w", err)
 	}
 
@@ -38,6 +42,7 @@ func (c *Connector) Connect(ctx context.Context, dsn string) error {
 	return nil
 }
 
+// Close закрывает подключение к ClickHouse.
 func (c *Connector) Close(ctx context.Context) error {
 	if c.conn != nil {
 		return c.conn.Close()
@@ -77,7 +82,10 @@ func parseDSN(dsn string) (*clickhouse.Options, error) {
 	if username == "" {
 		username = domain.DefaultClickHouseUser
 	}
-	password, _ := u.User.Password()
+	password, hasPassword := u.User.Password()
+	if !hasPassword {
+		password = ""
+	}
 
 	return &clickhouse.Options{
 		Addr: []string{addr},

@@ -38,6 +38,7 @@ func (c *Connector) Connect(ctx context.Context, dsn string) error {
 	return nil
 }
 
+// Close закрывает пул подключений к PostgreSQL.
 func (c *Connector) Close(ctx context.Context) error {
 	if c.pool != nil {
 		c.pool.Close()

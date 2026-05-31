@@ -106,7 +106,7 @@ func parseFlagSet(flagSet *flag.FlagSet, args []string, dsn *string) error {
 	}
 
 	if *dsn == "" {
-		return fmt.Errorf("DSN is required")
+		return fmt.Errorf("dsn is required")
 	}
 
 	return nil
@@ -138,7 +138,7 @@ func createLogger() *slog.Logger {
 func createAdapter(ctx context.Context, dsn string, logger *slog.Logger) (domain.DBProvider, error) {
 	dbType := detectDBType(dsn)
 
-	logger.Debug("определение типа БД", "type", dbType, "dsn", sanitizeDSN(dsn))
+		logger.Debug("определение типа БД", "type", dbType, "dsn", domain.SanitizeDSN(dsn))
 
 	switch dbType {
 	case "postgres":
@@ -153,18 +153,6 @@ func createAdapter(ctx context.Context, dsn string, logger *slog.Logger) (domain
 	default:
 		return nil, fmt.Errorf("unknown database type; supported: postgres, mysql, clickhouse")
 	}
-}
-
-// sanitizeDSN скрывает пароль из DSN для логирования
-func sanitizeDSN(dsn string) string {
-	// Простая санитизация — убираем пароль
-	if idx := strings.Index(dsn, "://"); idx != -1 {
-		rest := dsn[idx+3:]
-		if atIdx := strings.Index(rest, "@"); atIdx != -1 {
-			return dsn[:idx+3] + "***@" + rest[atIdx+1:]
-		}
-	}
-	return dsn
 }
 
 // detectDBType определяет тип БД по DSN
