@@ -1,0 +1,9 @@
+User-agent: Yandex
+Allow: /
+Host: https://turkprogrammer.github.io/sql-top/
+Sitemap: https://turkprogrammer.github.io/sql-top/sitemap.xml
+
+User-agent: *
+Allow: /
+
+Sitemap: https://turkprogrammer.github.io/sql-top/sitemap.xml

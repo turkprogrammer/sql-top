@@ -1,0 +1,2336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SQL-Top — TUI профайлер PostgreSQL, MySQL и ClickHouse | Live Query Monitor</title>
+    <meta name="description" content="SQL-Top — TUI профайлер баз данных в реальном времени. Мониторинг PostgreSQL, MySQL и ClickHouse в терминале. Single binary на Go 1.25+. Diff Engine, EXPLAIN без ANALYZE, Kill Query, кольцевой буфер на 5000 запросов. Бесплатно, open source.">
+    <meta name="keywords" content="sql-top, query monitor, postgresql monitor, mysql monitor, clickhouse monitor, tui database tool, go database profiler, pg_activity альтернатива, bubbletea tui, real-time query monitoring, database performance monitor, golang database tool, postgresql query profiler, mysql query profiler, clickhouse query profiler, sql profiler terminal, мониторинг бд, профайлер запросов, мониторинг postgresql, мониторинг mysql, мониторинг clickhouse, терминальный профайлер бд, live query monitor, sql monitor tui, hexagonal architecture go, turkprogrammer, sql top">
+    <meta name="author" content="turkprogrammer">
+    <meta name="language" content="ru">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="revisit-after" content="3 days">
+    <link rel="canonical" href="https://turkprogrammer.github.io/sql-top/">
+
+    <!-- Yandex -->
+    <meta name="yandex_catalog" content="sql-top — TUI профайлер баз данных">
+    <meta name="icb" content="true">
+    <meta name="geo" content="RU">
+    <meta name="geo.placename" content="Russia">
+    <meta name="geo.position" content="55.7558;37.6173">
+    <meta name="geo.region" content="RU-MOW">
+    <meta name="document-state" content="dynamic">
+    <meta name="resource-type" content="document">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="SQL-Top — TUI профайлер PostgreSQL, MySQL и ClickHouse | Live Query Monitor">
+    <meta property="og:description" content="Современный TUI профайлер для мониторинга PostgreSQL, MySQL и ClickHouse в реальном времени. Go 1.25+, Bubble Tea, Hexagonal Architecture. Diff Engine, EXPLAIN без ANALYZE, Kill Query — всё в терминале.">
+    <meta property="og:url" content="https://turkprogrammer.github.io/sql-top/">
+    <meta property="og:site_name" content="SQL-Top — Live Query Monitor">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:image" content="https://turkprogrammer.github.io/sql-top/favicon.svg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="SQL-Top — Live Query Monitor TUI">
+    <meta property="article:author" content="https://github.com/turkprogrammer">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SQL-Top — TUI профайлер PostgreSQL, MySQL и ClickHouse | Live Query Monitor">
+    <meta name="twitter:description" content="Реальный мониторинг PostgreSQL, MySQL и ClickHouse в терминале. Go 1.25+, Diff Engine, EXPLAIN без ANALYZE, Kill Query, кольцевой буфер. Бесплатно.">
+    <meta name="twitter:creator" content="@turkprogrammer">
+    <meta name="twitter:image" content="https://turkprogrammer.github.io/sql-top/favicon.svg">
+
+    <!-- Mobile -->
+    <meta name="theme-color" content="#0a0e14">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="favicon.svg">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "SQL-Top",
+        "alternateName": ["sql-top", "Live Query Monitor", "SQL-Top TUI Profiler", "SQL-Top мониторинг БД"],
+        "description": "SQL-Top — TUI профайлер для мониторинга PostgreSQL, MySQL и ClickHouse в реальном времени. Go 1.25+, single binary, Diff Engine, EXPLAIN без ANALYZE, Kill Query. Бесплатный open source инструмент для разработчиков и администраторов баз данных.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Cross-platform (Linux, macOS, Windows)",
+        "url": "https://turkprogrammer.github.io/sql-top/",
+        "downloadUrl": "https://github.com/turkprogrammer/sql-top/releases",
+        "installUrl": "https://github.com/turkprogrammer/sql-top#%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/OnlineOnly"
+        },
+        "softwareHelp": {
+            "@type": "HelpDocument",
+            "url": "https://github.com/turkprogrammer/sql-top/blob/master/README.md",
+            "name": "Документация SQL-Top"
+        },
+        "programmingLanguage": {
+            "@type": "ComputerLanguage",
+            "name": "Go",
+            "url": "https://go.dev/"
+        },
+        "runtimePlatform": "Go 1.25+",
+        "featureList": [
+            "Live мониторинг активных запросов PostgreSQL, MySQL, ClickHouse",
+            "Diff-движок для отслеживания новых/завершённых запросов",
+            "EXPLAIN запросов без выхода из TUI",
+            "Kill Query по PID с подтверждением",
+            "Кольцевой буфер истории на 5000 запросов",
+            "Копирование запроса в буфер обмена",
+            "Адаптивная вёрстка под размер терминала",
+            "Safe EXPLAIN без ANALYZE",
+            "Цветовая подсветка статусов запросов",
+            "Пинг-мониторинг подключения к БД",
+            "Delta Highlighting изменений",
+            "Graceful Shutdown через Context"
+        ],
+        "screenshot": "https://turkprogrammer.github.io/sql-top/",
+        "dateCreated": "2025-01-01",
+        "dateModified": "2026-06-02",
+        "datePublished": "2025-01-01",
+        "author": {
+            "@type": "Person",
+            "name": "Юсупов Роберт Рахимович",
+            "url": "https://github.com/turkprogrammer",
+            "jobTitle": "Senior Backend Engineer"
+        },
+        "keywords": "sql-top, tui профайлер, мониторинг postgresql, мониторинг mysql, мониторинг clickhouse, database profiler, go, golang, bubbletea, live query monitor, postgresql мониторинг, mysql мониторинг, clickhouse мониторинг, pg_activity альтернатива",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "license": "https://opensource.org/licenses/MIT",
+        "applicationSubCategory": "Database Monitor, SQL Profiler, TUI Tool",
+        "review": {
+            "@type": "Review",
+            "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": "5",
+                "bestRating": "5"
+            },
+            "author": {
+                "@type": "Person",
+                "name": "turkprogrammer"
+            }
+        }
+    }
+    </script>
+
+    <!-- JSON-LD BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Главная",
+                "item": "https://turkprogrammer.github.io/sql-top/"
+            }
+        ]
+    }
+    </script>
+
+    <!-- JSON-LD WebSite -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "SQL-Top — Live Query Monitor",
+        "url": "https://turkprogrammer.github.io/sql-top/",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://github.com/turkprogrammer/sql-top/search?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #100b0a;
+            --bg-panel: #1a1311;
+            --bg-card: #221916;
+            --text-main: #c4b8ae;
+            --text-muted: #6a5a4f;
+            --text-bright: #e0d6cc;
+            --accent-cyan: #00e5ff;
+            --accent-teal: #00b8d4;
+            --accent-green: #00e676;
+            --accent-red: #ff5252;
+            --accent-orange: #ff9100;
+            --accent-purple: #b388ff;
+            --accent-yellow: #ffd740;
+            --accent-blue: #5c9eff;
+            --grid-line: rgba(0, 229, 255, 0.06);
+            --glow-cyan: 0 0 20px rgba(0, 229, 255, 0.12);
+            --glow-green: 0 0 20px rgba(0, 230, 118, 0.12);
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            overflow-x: hidden;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ── Noise overlay ── */
+        .noise {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 999; opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* ── Scanlines ── */
+        .scanline {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 998;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 229, 255, 0.02) 2px,
+                rgba(0, 229, 255, 0.02) 4px
+            );
+        }
+
+        /* ── Scroll progress ── */
+        .scroll-progress {
+            position: fixed; top: 0; left: 0; height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue), var(--accent-green));
+            z-index: 10000; width: 0%; transition: width 0.1s linear;
+        }
+
+        /* ── Mouse glow ── */
+        .mouse-glow {
+            position: fixed; width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(0, 229, 255, 0.05) 0%, rgba(66, 165, 245, 0.02) 40%, transparent 70%);
+            pointer-events: none; z-index: 1; transform: translate(-50%, -50%);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        body:hover .mouse-glow { opacity: 1; }
+
+        /* ── Database grid pattern ── */
+        .db-grid {
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background-image:
+                linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%);
+            animation: gridShift 20s linear infinite;
+        }
+        @keyframes gridShift {
+            from { transform: translateY(0); }
+            to { transform: translateY(-60px); }
+        }
+
+        .container {
+            max-width: 1200px; margin: 0 auto; padding: 2rem;
+            display: grid; gap: 4rem; position: relative; z-index: 2;
+        }
+
+        /* ── Header ── */
+        header {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            border-bottom: 1px solid var(--grid-line); padding-bottom: 2rem;
+        }
+
+        header::after {
+            content: ''; position: absolute; bottom: -1px; left: 0; width: 200px; height: 1px;
+            background: linear-gradient(90deg, var(--accent-cyan), transparent);
+        }
+
+        .logo-area { display: flex; align-items: center; gap: 1rem; }
+
+        .logo-icon {
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-mono); font-weight: 700; font-size: 1.1rem;
+            color: var(--bg-deep); box-shadow: var(--glow-cyan);
+            position: relative;
+        }
+
+        .logo-icon::after {
+            content: ''; position: absolute; inset: -3px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            opacity: 0.25; z-index: -1; filter: blur(10px);
+        }
+
+        h1 {
+            font-family: var(--font-display); font-size: clamp(2.2rem, 6vw, 4rem);
+            font-weight: 700; line-height: 0.95; letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--accent-cyan), #fff 50%, var(--accent-blue));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            font-size: 0.85rem; color: var(--accent-cyan);
+            text-transform: uppercase; letter-spacing: 0.15em; margin-top: 0.75rem;
+            font-family: var(--font-mono);
+        }
+
+        .header-right { text-align: right; }
+
+        .version-badge {
+            display: inline-block; padding: 0.3rem 0.8rem;
+            border: 1px solid var(--accent-cyan); color: var(--accent-cyan);
+            font-size: 0.75rem; letter-spacing: 0.1em;
+            background: rgba(0, 229, 255, 0.05);
+            transition: all 0.3s;
+        }
+        .version-badge:hover {
+            background: rgba(0, 229, 255, 0.15);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .github-link {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.25rem 0.6rem; border: 1px solid var(--grid-line);
+            background: transparent; color: var(--text-muted);
+            text-decoration: none; font-size: 0.72rem;
+            transition: all 0.2s; letter-spacing: 0.05em;
+            font-family: var(--font-mono);
+        }
+        .github-link:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); background: rgba(0, 229, 255, 0.05); }
+
+        /* ── Section titles ── */
+        .section-title {
+            font-family: var(--font-display); font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: 700; line-height: 1.1; letter-spacing: -0.01em;
+            color: var(--text-bright); margin-bottom: 1.5rem;
+            display: flex; align-items: center; gap: 0.75rem;
+        }
+        .section-title .num {
+            font-family: var(--font-mono); font-size: 0.8rem;
+            color: var(--accent-cyan); opacity: 0.5; font-weight: 400;
+        }
+        .section-title::after {
+            content: ''; flex: 1; height: 1px;
+            background: linear-gradient(90deg, var(--grid-line), transparent);
+        }
+
+        .section-subtitle {
+            font-size: 0.9rem; color: var(--text-muted); margin-bottom: 2rem;
+            max-width: 60ch;
+        }
+
+        /* ── Terminal Demo ── */
+        .terminal-demo {
+            background: rgba(26, 19, 17, 0.25);
+            backdrop-filter: blur(18px) saturate(0.8);
+            -webkit-backdrop-filter: blur(18px) saturate(0.8);
+            border: 1px solid var(--grid-line);
+            overflow: hidden;
+            animation: terminalAppear 0.6s ease-out;
+        }
+        @keyframes terminalAppear {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .terminal-demo::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+        }
+
+        .terminal-header {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.85rem 1.5rem; border-bottom: 1px solid var(--grid-line);
+            background: rgba(0, 229, 255, 0.02);
+        }
+
+        .terminal-dots { display: flex; gap: 6px; }
+        .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .terminal-dot:nth-child(1) { background: var(--accent-red); }
+        .terminal-dot:nth-child(2) { background: var(--accent-yellow); }
+        .terminal-dot:nth-child(3) { background: var(--accent-green); }
+
+        .terminal-title {
+            font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.05em;
+            flex: 1; text-align: center;
+        }
+
+        .terminal-controls { display: flex; gap: 0.4rem; }
+        .terminal-btn {
+            padding: 0.25rem 0.6rem; border: 1px solid var(--grid-line);
+            background: transparent; color: var(--text-muted);
+            font-family: var(--font-mono); font-size: 0.6rem; cursor: pointer;
+            transition: all 0.2s; letter-spacing: 0.05em;
+        }
+        .terminal-btn:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); background: rgba(0, 229, 255, 0.05); }
+        .terminal-btn.active { border-color: var(--accent-cyan); color: var(--accent-cyan); background: rgba(0, 229, 255, 0.1); }
+        .terminal-btn.replay:hover svg { animation: replaySpin 0.4s ease; }
+        @keyframes replaySpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+
+        .terminal-body {
+            padding: 1.25rem 1.5rem; font-size: 0.82rem; min-height: 340px;
+            position: relative;
+        }
+
+        .terminal-cmd {
+            color: var(--text-muted); margin-bottom: 1rem;
+            display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+        }
+        .terminal-cmd .prompt { color: var(--accent-green); }
+        .terminal-cmd .cmd { color: var(--accent-cyan); }
+        .terminal-cmd .cursor {
+            display: inline-block; width: 8px; height: 1.1em;
+            background: var(--accent-cyan); animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .terminal-cmd .status-dot {
+            display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+            background: var(--accent-green); margin-left: 0.75rem;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.4); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(0, 230, 118, 0); }
+        }
+
+        /* SQL Table */
+        .sql-table {
+            width: 100%; border-collapse: collapse; font-size: 0.78rem;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .sql-table thead th {
+            text-align: left; padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--grid-line);
+            color: var(--text-muted); font-weight: 500; font-size: 0.68rem;
+            text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .sql-table tbody td {
+            padding: 0.45rem 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: background 0.2s;
+        }
+        .sql-table tbody tr { transition: background 0.2s; opacity: 0; animation: rowIn 0.3s ease forwards; }
+        .sql-table tbody tr:nth-child(1) { animation-delay: 0.5s; }
+        .sql-table tbody tr:nth-child(2) { animation-delay: 0.8s; }
+        .sql-table tbody tr:nth-child(3) { animation-delay: 1.1s; }
+        .sql-table tbody tr:nth-child(4) { animation-delay: 1.4s; }
+        .sql-table tbody tr:nth-child(5) { animation-delay: 1.7s; }
+        .sql-table tbody tr:nth-child(6) { animation-delay: 2.0s; }
+        .sql-table tbody tr:nth-child(7) { animation-delay: 2.3s; }
+        @keyframes rowIn {
+            from { opacity: 0; transform: translateX(-8px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .sql-table tbody tr:hover { background: rgba(0, 229, 255, 0.03); }
+        .sql-table tbody tr.new { border-left: 2px solid var(--accent-green); }
+        .sql-table tbody tr.removed { border-left: 2px solid var(--accent-orange); opacity: 0.5; }
+        .sql-table tbody tr.updated { border-left: 2px solid var(--accent-cyan); }
+
+        /* Status badges in sql table */
+        .status-badge {
+            display: inline-block; padding: 0.1rem 0.45rem;
+            font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+        .status-badge.active { color: var(--accent-green); background: rgba(0, 230, 118, 0.1); }
+        .status-badge.idle { color: var(--text-muted); background: rgba(255, 255, 255, 0.05); }
+        .status-badge.locked { color: var(--accent-orange); background: rgba(255, 145, 0, 0.1); }
+        .status-badge.error { color: var(--accent-red); background: rgba(255, 82, 82, 0.1); }
+
+        .db-badge {
+            display: inline-block; padding: 0.1rem 0.35rem;
+            font-size: 0.55rem; font-weight: 600; letter-spacing: 0.05em;
+        }
+        .db-badge.pg { color: #336791; background: rgba(51, 103, 145, 0.15); }
+        .db-badge.mysql { color: #f29111; background: rgba(242, 145, 17, 0.15); }
+        .db-badge.ch { color: #ffcc00; background: rgba(255, 204, 0, 0.15); }
+
+        .query-text { color: var(--text-main); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+        .query-text .keyword { color: var(--accent-blue); }
+        .query-text .func { color: var(--accent-orange); }
+        .query-text .str { color: var(--accent-green); }
+        .query-text .num { color: var(--accent-purple); }
+
+        .delta-icon {
+            display: inline-block; width: 16px; text-align: center;
+            font-size: 0.65rem; font-weight: 700;
+        }
+        .delta-icon.new { color: var(--accent-green); }
+        .delta-icon.removed { color: var(--accent-orange); }
+        .delta-icon.updated { color: var(--accent-cyan); }
+
+        /* Terminal Footer */
+        .terminal-footer {
+            padding: 0.85rem 1.5rem; border-top: 1px solid var(--grid-line);
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.7rem; color: var(--text-muted); flex-wrap: wrap; gap: 0.5rem;
+        }
+        .footer-stats { display: flex; gap: 1rem; }
+        .footer-stat { display: flex; align-items: center; gap: 0.3rem; }
+        .footer-stat .num { color: var(--accent-cyan); }
+        .footer-tags { display: flex; gap: 0.4rem; }
+        .footer-tags .status-badge { transition: background 0.3s, border-color 0.3s, box-shadow 0.3s; }
+        .footer-tags .status-badge.tag-glow {
+            background: rgba(0,229,255,0.1) !important;
+            border-color: var(--accent-cyan) !important;
+            box-shadow: 0 0 12px rgba(0,229,255,0.2);
+        }
+        .live-dot {
+            display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+            background: var(--accent-green); margin-right: 2px;
+            animation: livePulse 1.5s ease-in-out infinite;
+        }
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 4px var(--accent-green); }
+            50% { opacity: 0.4; transform: scale(0.85); box-shadow: 0 0 2px var(--accent-green); }
+        }
+        .stat-flash { animation: statFlash 0.5s ease; }
+        .stat-flash-neg { animation: statFlashNeg 0.5s ease; }
+        @keyframes statFlash {
+            0% { color: var(--accent-green); transform: scale(1); }
+            50% { color: #fff; transform: scale(1.25); }
+            100% { color: var(--accent-green); transform: scale(1); }
+        }
+        @keyframes statFlashNeg {
+            0% { color: var(--accent-orange); transform: scale(1); }
+            50% { color: #fff; transform: scale(1.25); }
+            100% { color: var(--accent-orange); transform: scale(1); }
+        }
+        .stat-uptime { font-variant-numeric: tabular-nums; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ── Demo Live Simulation ── */
+        .explain-popup {
+            position: absolute; z-index: 50;
+            top: 0.75rem; left: 0.75rem;
+            background: var(--bg-deep); border: 1px solid var(--accent-cyan);
+            padding: 1rem 1.25rem; font-size: 0.75rem; min-width: 340px;
+            max-width: calc(100% - 1.5rem);
+            box-shadow: 0 4px 30px rgba(0, 229, 255, 0.15), 0 0 60px rgba(0, 229, 255, 0.05);
+            opacity: 0; transform: translateY(6px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            pointer-events: none;
+        }
+        .explain-popup.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .explain-popup .explain-title {
+            font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--accent-cyan); margin-bottom: 0.6rem;
+        }
+        .explain-popup .explain-line {
+            display: flex; justify-content: space-between; padding: 0.2rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .explain-popup .explain-key { color: var(--text-muted); }
+        .explain-popup .explain-val { color: var(--text-bright); font-family: var(--font-mono); }
+        .explain-popup .explain-val.high { color: var(--accent-red); }
+        .explain-popup .explain-val.ok { color: var(--accent-green); }
+
+        .demo-notification {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+            background: rgba(0, 229, 255, 0.08); border: 1px solid var(--accent-cyan);
+            padding: 0.5rem 1rem; font-size: 0.75rem; color: var(--accent-cyan);
+            opacity: 0; pointer-events: none; transition: all 0.4s ease;
+            text-align: center; white-space: nowrap;
+        }
+        .demo-notification.show { opacity: 1; transform: translate(-50%,-50%) translateY(0); }
+
+        .row-flash {
+            animation: rowFlash 0.6s ease;
+        }
+        @keyframes rowFlash {
+            0% { background: rgba(0, 229, 255, 0.15); }
+            100% { background: transparent; }
+        }
+
+        .sql-table tbody tr { cursor: pointer; }
+
+        /* ── Stats Section ── */
+        .seo-intro {
+            margin: 2rem 0; display: flex; flex-direction: column; gap: 0.75rem;
+        }
+        .seo-intro-text {
+            font-size: 0.82rem; color: var(--text-main); line-height: 1.7;
+            max-width: 80ch;
+        }
+        .seo-intro-text strong {
+            color: var(--text-bright); font-weight: 600;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card); border: 1px solid var(--grid-line);
+            padding: 1.5rem; text-align: center; position: relative;
+            transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+            opacity: 0; transition: opacity 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent-cyan); transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 229, 255, 0.08);
+        }
+        .stat-card:hover::before { opacity: 1; }
+
+        .stat-icon {
+            font-size: 1.5rem; margin-bottom: 0.5rem; line-height: 1;
+        }
+
+        .stat-value {
+            font-family: var(--font-display); font-size: 2rem;
+            font-weight: 700; color: var(--accent-cyan); line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.7rem; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.5rem;
+        }
+
+        .stat-tooltip {
+            display: none; position: absolute; bottom: calc(100% + 10px);
+            left: 50%; transform: translateX(-50%); width: 260px;
+            background: var(--bg-deep); border: 1px solid var(--accent-cyan);
+            color: var(--text-main); font-size: 0.72rem; line-height: 1.5;
+            padding: 0.75rem 1rem; z-index: 100; text-transform: none;
+            letter-spacing: normal; font-weight: 400;
+            box-shadow: 0 4px 20px rgba(0, 229, 255, 0.15);
+        }
+        .stat-tooltip::after {
+            content: ''; position: absolute; top: 100%; left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent; border-top-color: var(--accent-cyan);
+        }
+        .stat-card:hover .stat-tooltip { display: block; }
+
+        /* ── Install Section ── */
+        .install-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+        }
+
+        .install-block {
+            background: var(--bg-panel); border: 1px solid var(--grid-line);
+            padding: 1.5rem; position: relative;
+        }
+
+        .install-block::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-green), transparent);
+        }
+
+        .install-label {
+            font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted);
+            letter-spacing: 0.1em; margin-bottom: 0.75rem;
+        }
+
+        .install-cmd {
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(0, 230, 118, 0.03); border: 1px solid rgba(0, 230, 118, 0.1);
+            padding: 0.75rem 1rem; gap: 1rem;
+        }
+
+        .install-cmd code {
+            color: var(--accent-green); font-size: 0.82rem;
+            word-break: break-all; flex: 1;
+        }
+
+        .copy-btn {
+            background: transparent; border: 1px solid var(--accent-green);
+            color: var(--accent-green); padding: 0.35rem 0.75rem;
+            font-family: var(--font-mono); font-size: 0.65rem;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+        }
+        .copy-btn:hover { background: var(--accent-green); color: var(--bg-deep); }
+        .copy-btn.copied { background: var(--accent-cyan); border-color: var(--accent-cyan); color: var(--bg-deep); }
+
+        /* ── Features Grid ── */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card); border: 1px solid var(--grid-line);
+            padding: 1.75rem; position: relative; overflow: hidden;
+            transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-blue));
+            opacity: 0; transition: opacity 0.3s;
+        }
+
+        .feature-card::after {
+            content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(0, 229, 255, 0.03) 0%, transparent 70%);
+            opacity: 0; transition: opacity 0.5s;
+        }
+
+        .feature-card:hover { border-color: var(--accent-cyan); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0, 229, 255, 0.06); }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-card:hover::after { opacity: 1; }
+
+        .feature-icon {
+            font-size: 1.4rem; margin-bottom: 0.75rem; line-height: 1;
+        }
+
+        .feature-num {
+            font-family: var(--font-display); font-size: 2rem; font-weight: 700;
+            color: rgba(0, 229, 255, 0.08); margin-bottom: 0.5rem; line-height: 1;
+        }
+
+        .feature-title {
+            font-family: var(--font-display); font-size: 1.05rem;
+            color: var(--text-bright); margin-bottom: 0.4rem; font-weight: 600;
+        }
+
+        .feature-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.65; }
+
+        .feature-tag {
+            display: inline-block; margin-top: 0.75rem; padding: 0.15rem 0.5rem;
+            background: rgba(0, 229, 255, 0.08); color: var(--accent-cyan);
+            font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em;
+        }
+
+        /* ── Shortcuts Table ── */
+        .shortcuts-section {
+            background: var(--bg-panel); border: 1px solid var(--grid-line);
+            padding: 2rem; position: relative;
+        }
+
+        .shortcuts-section::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+        }
+
+        .shortcuts-table {
+            width: 100%; border-collapse: collapse; font-size: 0.82rem;
+        }
+        .shortcuts-table th {
+            text-align: left; padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--grid-line);
+            color: var(--text-muted); font-weight: 500; font-size: 0.7rem;
+            text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .shortcuts-table td {
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .shortcuts-table tr:hover td { background: rgba(0, 229, 255, 0.02); }
+
+        .shortcut-key {
+            display: inline-block; padding: 0.15rem 0.5rem;
+            background: var(--bg-card); border: 1px solid var(--grid-line);
+            color: var(--accent-cyan); font-family: var(--font-mono);
+            font-size: 0.72rem; text-align: center; min-width: 40px;
+        }
+        .shortcut-key.combo { background: rgba(0, 229, 255, 0.05); border-color: rgba(0, 229, 255, 0.15); }
+
+        .shortcut-desc { color: var(--text-muted); }
+        .shortcut-action { color: var(--text-main); }
+
+        /* ── Architecture ── */
+        .arch-section {
+            background: var(--bg-panel); border: 1px solid var(--grid-line);
+            padding: 2rem; position: relative; overflow: hidden;
+        }
+
+        .arch-section::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+        }
+
+        .arch-diagram {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 1rem; padding: 1.5rem 0;
+        }
+
+        .arch-top {
+            display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;
+        }
+
+        .arch-box {
+            border: 1px solid var(--grid-line); padding: 0.75rem 1.25rem;
+            text-align: center; min-width: 160px;
+            transition: border-color 0.3s, transform 0.3s;
+            font-size: 0.78rem;
+        }
+        .arch-box:hover { border-color: var(--accent-cyan); transform: translateY(-2px); }
+
+        .arch-box.main { border-color: rgba(0, 229, 255, 0.2); background: rgba(0, 229, 255, 0.03); }
+        .arch-box.ui { border-color: rgba(66, 165, 245, 0.2); background: rgba(66, 165, 245, 0.03); }
+        .arch-box.domain { border-color: rgba(0, 230, 118, 0.2); background: rgba(0, 230, 118, 0.03); }
+
+        .arch-title {
+            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--text-muted); margin-bottom: 0.25rem;
+        }
+
+        .arch-name {
+            font-family: var(--font-display); font-size: 0.9rem;
+            color: var(--text-bright); font-weight: 600;
+        }
+
+        .arch-arrow {
+            color: var(--text-muted); font-size: 1.2rem; text-align: center;
+        }
+
+        .arch-bottom {
+            display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+        }
+
+        .arch-adapter {
+            border: 1px solid var(--grid-line); padding: 0.6rem 1rem;
+            text-align: center; min-width: 130px; font-size: 0.75rem;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .arch-adapter:hover { transform: translateY(-2px); }
+        .arch-adapter.pg { border-color: rgba(51, 103, 145, 0.3); }
+        .arch-adapter.pg:hover { border-color: #336791; }
+        .arch-adapter.mysql { border-color: rgba(242, 145, 17, 0.3); }
+        .arch-adapter.mysql:hover { border-color: #f29111; }
+        .arch-adapter.ch { border-color: rgba(255, 204, 0, 0.3); }
+        .arch-adapter.ch:hover { border-color: #ffcc00; }
+
+        .arch-adapter .adapter-icon { font-size: 1.2rem; display: block; margin-bottom: 0.25rem; }
+        .arch-adapter .adapter-name { color: var(--text-main); }
+        .arch-adapter .adapter-desc { font-size: 0.6rem; color: var(--text-muted); }
+
+        .arch-note {
+            font-size: 0.72rem; color: var(--text-muted); text-align: center;
+            padding-top: 1rem; border-top: 1px solid var(--grid-line); margin-top: 1.5rem;
+        }
+
+        /* ── Comparison Table ── */
+        .comparison-section {
+            background: var(--bg-panel); border: 1px solid var(--grid-line);
+            padding: 2rem; position: relative;
+        }
+
+        .comparison-section::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-orange), transparent);
+        }
+
+        .comparison-table {
+            width: 100%; border-collapse: collapse; font-size: 0.8rem;
+        }
+        .comparison-table th {
+            text-align: left; padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--grid-line);
+            color: var(--text-muted); font-weight: 500; font-size: 0.7rem;
+            text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .comparison-table th:first-child { color: var(--accent-cyan); }
+        .comparison-table td {
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .comparison-table tr:last-child td { border-bottom: none; }
+        .comparison-table tr:hover td { background: rgba(0, 229, 255, 0.02); }
+
+        .comparison-table .win { color: var(--accent-green); }
+        .comparison-table .neutral { color: var(--text-muted); }
+        .comparison-table .loss { color: var(--accent-red); }
+        .comparison-table .highlight-row td { background: rgba(0, 229, 255, 0.04); }
+
+        /* ── Config Section ── */
+        .config-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .config-card {
+            background: var(--bg-card); border: 1px solid var(--grid-line);
+            padding: 1.25rem; position: relative;
+            transition: border-color 0.3s;
+        }
+        .config-card:hover { border-color: var(--accent-cyan); }
+
+        .config-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .config-card:hover::before { opacity: 1; }
+
+        .config-category {
+            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--accent-cyan); margin-bottom: 0.75rem;
+        }
+
+        .config-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.4rem 0; font-size: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .config-item:last-child { border-bottom: none; }
+
+        .config-key { color: var(--text-main); }
+        .config-val { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.7rem; }
+
+        /* ── Connection Examples ── */
+        .conn-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .conn-card {
+            background: var(--bg-panel); border: 1px solid var(--grid-line);
+            padding: 1.5rem; position: relative;
+            transition: border-color 0.3s;
+        }
+        .conn-card:hover { border-color: var(--accent-cyan); }
+
+        .conn-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+        }
+
+        .conn-header {
+            display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;
+        }
+
+        .conn-icon {
+            width: 36px; height: 36px; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: 700;
+        }
+        .conn-icon.pg { background: rgba(51, 103, 145, 0.15); color: #336791; }
+        .conn-icon.mysql { background: rgba(242, 145, 17, 0.15); color: #f29111; }
+        .conn-icon.ch { background: rgba(255, 204, 0, 0.15); color: #ffcc00; }
+
+        .conn-title { font-family: var(--font-display); font-size: 1rem; color: var(--text-bright); font-weight: 600; }
+
+        .conn-cmd {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--grid-line);
+            padding: 0.6rem 0.75rem;
+            display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+        }
+        .conn-cmd code {
+            font-size: 0.72rem; color: var(--accent-cyan); word-break: break-all; flex: 1;
+        }
+
+        .conn-variants { margin-top: 0.75rem; }
+        .conn-variant {
+            padding: 0.35rem 0; font-size: 0.72rem; color: var(--text-muted);
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .conn-variant code {
+            word-break: break-all; overflow-wrap: break-word;
+        }
+        .conn-variant .arrow { color: var(--accent-green); }
+
+        /* ── FAQ ── */
+        .faq-list {
+            display: flex; flex-direction: column; gap: 0.5rem;
+        }
+        .faq-item {
+            background: var(--bg-panel); border: 1px solid var(--grid-line);
+            border-radius: 0; transition: border-color 0.2s;
+        }
+        .faq-item[open] {
+            border-color: var(--accent-cyan);
+        }
+        .faq-item summary {
+            cursor: pointer; padding: 0.85rem 1.2rem;
+            font-family: var(--font-display); font-size: 0.88rem;
+            color: var(--text-bright); font-weight: 600;
+            display: flex; align-items: center; gap: 0.5rem;
+            list-style: none; user-select: none;
+            transition: color 0.2s;
+        }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::before {
+            content: '+'; font-size: 1rem; color: var(--accent-cyan);
+            font-family: var(--font-mono); font-weight: 700;
+            width: 1.2rem; text-align: center; flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+        .faq-item[open] summary::before {
+            content: '−'; transform: rotate(0deg);
+        }
+        .faq-item summary:hover { color: var(--accent-cyan); }
+        .faq-item[open] summary { color: var(--accent-cyan); border-bottom: 1px solid var(--grid-line); }
+        .faq-item[open] > div {
+            padding: 1rem 1.2rem 1.2rem;
+            font-size: 0.82rem; color: var(--text-main); line-height: 1.7;
+        }
+        .faq-item kbd {
+            display: inline-block; padding: 0.1rem 0.4rem;
+            background: var(--bg-card); border: 1px solid var(--grid-line);
+            font-family: var(--font-mono); font-size: 0.75rem;
+            color: var(--accent-cyan);
+        }
+        .faq-item code {
+            background: var(--bg-card); padding: 0.1rem 0.35rem;
+            font-family: var(--font-mono); font-size: 0.8rem;
+            color: var(--accent-cyan);
+        }
+        .faq-item a { color: var(--accent-cyan); text-decoration: none; border-bottom: 1px solid transparent; }
+        .faq-item a:hover { border-bottom-color: var(--accent-cyan); }
+
+        /* ── Author Section ── */
+        .author-section {
+            background: var(--bg-panel); border: 1px solid var(--grid-line);
+            padding: 2rem; position: relative;
+        }
+
+        .author-section::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-purple), transparent);
+        }
+
+        .author-card {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 1.5rem;
+        }
+
+        .author-info { flex: 1; min-width: 240px; }
+
+        .author-name {
+            font-family: var(--font-display); font-size: 1.2rem;
+            color: var(--text-bright); font-weight: 700;
+        }
+
+        .author-title-text {
+            font-size: 0.82rem; color: var(--accent-cyan);
+            margin-top: 0.2rem;
+        }
+
+        .author-bio {
+            font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem;
+            max-width: 50ch; line-height: 1.6;
+        }
+        .author-bio a {
+            color: var(--accent-cyan); text-decoration: none;
+            transition: all 0.2s; border-bottom: 1px solid transparent;
+        }
+        .author-bio a:hover {
+            border-bottom-color: var(--accent-cyan); text-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+        }
+
+        .author-links {
+            display: flex; gap: 0.75rem; flex-wrap: wrap; flex-shrink: 0;
+        }
+
+        .author-link {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.4rem 0.8rem; border: 1px solid var(--grid-line);
+            color: var(--text-muted); text-decoration: none;
+            font-size: 0.72rem; transition: all 0.2s;
+        }
+        .author-link:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); background: rgba(0, 229, 255, 0.04); }
+
+        /* ── Footer ── */
+        footer {
+            border-top: 1px solid var(--grid-line); padding-top: 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.75rem; color: var(--text-muted); flex-wrap: wrap; gap: 1rem;
+        }
+
+        .footer-links { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+        .footer-links a {
+            color: var(--text-muted); text-decoration: none; transition: color 0.2s;
+        }
+        .footer-links a:hover { color: var(--accent-cyan); }
+
+        .footer-built {
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .footer-built .heart { color: var(--accent-red); animation: heartbeat 1.5s ease-in-out infinite; }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        /* ── Noscript Fallback ── */
+        .noscript-fallback { display: none; }
+        noscript .noscript-fallback { display: block; }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .header-right { text-align: left; }
+            .install-grid { grid-template-columns: 1fr; }
+            .arch-bottom { flex-direction: column; align-items: center; }
+            .shortcuts-table th:nth-child(3), .shortcuts-table td:nth-child(3) { display: none; }
+            .comparison-table th:nth-child(4), .comparison-table td:nth-child(4),
+            .comparison-table th:nth-child(5), .comparison-table td:nth-child(5) { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 1rem; gap: 2.5rem; }
+            .features-grid { grid-template-columns: 1fr; }
+            .config-grid { grid-template-columns: 1fr; }
+            .conn-grid { grid-template-columns: 1fr; }
+            .stats-bar { grid-template-columns: repeat(2, 1fr); }
+            .sql-table thead th:nth-child(3), .sql-table tbody td:nth-child(3),
+            .sql-table thead th:nth-child(6), .sql-table tbody td:nth-child(6) { display: none; }
+            .shortcuts-table th:nth-child(2), .shortcuts-table td:nth-child(2) { display: none; }
+            .terminal-body { padding: 0.75rem; }
+            .footer-stats { display: none; }
+        }
+
+        /* ── Accessibility ── */
+        .sr-only {
+            position: absolute; width: 1px; height: 1px;
+            padding: 0; margin: -1px; overflow: hidden;
+            clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            html { scroll-behavior: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── Background Effects ── -->
+    <div class="noise" aria-hidden="true"></div>
+    <div class="scanline" aria-hidden="true"></div>
+    <div class="db-grid" aria-hidden="true"></div>
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+    <div class="mouse-glow" id="mouseGlow" aria-hidden="true"></div>
+
+
+
+    <div class="container">
+
+        <!-- ════════════════════════════ HEADER ════════════════════════════ -->
+        <header role="banner">
+            <div class="logo-area">
+                <div class="logo-icon" aria-hidden="true">SQ</div>
+                <div>
+                    <h1>SQL-Top</h1>
+                    <p class="tagline">Live Query Monitor</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="version-badge">v0.1.0</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.35rem; letter-spacing: 0.05em;">Go 1.25+ · TUI</div>
+                <a class="github-link" href="https://github.com/turkprogrammer/sql-top" target="_blank" rel="noopener noreferrer" aria-label="GitHub репозиторий">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                    GitHub →
+                </a>
+            </div>
+        </header>
+
+        <!-- ════════════════════════════ TERMINAL DEMO ════════════════════════════ -->
+        <section class="terminal-demo" role="region" aria-label="Терминальная демонстрация SQL-Top">
+            <div class="terminal-header">
+                <div class="terminal-dots" aria-hidden="true">
+                    <span class="terminal-dot"></span>
+                    <span class="terminal-dot"></span>
+                    <span class="terminal-dot"></span>
+                </div>
+                <span class="terminal-title">sql-top — live monitoring session</span>
+                <div class="terminal-controls">
+                    <button class="terminal-btn replay" onclick="replayDemo()" aria-label="Повторить демонстрацию" title="Replay">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="terminal-body" id="terminalBody">
+                <div class="terminal-cmd">
+                    <span class="prompt">$</span>
+                    <span class="cmd">sql-top postgres://admin@db-prod-1:5432/mydb</span>
+                    <span class="status-dot" aria-label="Connected"></span>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="sql-table" id="sqlTable" role="table" aria-label="Активные запросы">
+                        <thead>
+                            <tr>
+                                <th scope="col"><span class="delta-icon" aria-hidden="true"></span></th>
+                                <th scope="col">PID</th>
+                                <th scope="col">User</th>
+                                <th scope="col">DB</th>
+                                <th scope="col">State</th>
+                                <th scope="col">Duration</th>
+                                <th scope="col">Query</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sqlTableBody">
+                            <tr class="new" onclick="showExplain(this, 87342)">
+                                <td><span class="delta-icon new">▸</span></td>
+                                <td class="pid">87342</td>
+                                <td>app_user</td>
+                                <td><span class="db-badge pg">PG</span></td>
+                                <td><span class="status-badge active">active</span></td>
+                                <td>2.3s</td>
+                                <td><span class="query-text"><span class="keyword">SELECT</span> u.id, u.name, o.total <span class="keyword">FROM</span> users u <span class="keyword">JOIN</span> orders o …</span></td>
+                            </tr>
+                            <tr class="new" onclick="showExplain(this, 87341)">
+                                <td><span class="delta-icon new">▸</span></td>
+                                <td class="pid">87341</td>
+                                <td>replicator</td>
+                                <td><span class="db-badge pg">PG</span></td>
+                                <td><span class="status-badge idle">idle</span></td>
+                                <td>15.8s</td>
+                                <td><span class="query-text"><span class="keyword">COPY</span> analytics_events <span class="keyword">FROM</span> <span class="str">'/data/export.csv'</span></span></td>
+                            </tr>
+                            <tr onclick="showExplain(this, 87338)">
+                                <td></td>
+                                <td class="pid">87338</td>
+                                <td>ml_user</td>
+                                <td><span class="db-badge pg">PG</span></td>
+                                <td><span class="status-badge active">active</span></td>
+                                <td>8.1s</td>
+                                <td><span class="query-text"><span class="keyword">WITH</span> features <span class="keyword">AS</span> (<span class="keyword">SELECT</span> …) <span class="keyword">UPDATE</span> predictions <span class="keyword">SET</span> score = …</span></td>
+                            </tr>
+                            <tr class="updated" onclick="showExplain(this, 87335)">
+                                <td><span class="delta-icon updated">◆</span></td>
+                                <td class="pid">87335</td>
+                                <td>analytics</td>
+                                <td><span class="db-badge mysql">MY</span></td>
+                                <td><span class="status-badge locked">locked</span></td>
+                                <td>22.7s</td>
+                                <td><span class="query-text"><span class="keyword">UPDATE</span> inventory <span class="keyword">SET</span> quantity = quantity - <span class="num">1</span> <span class="keyword">WHERE</span> id = …</span></td>
+                            </tr>
+                            <tr onclick="showExplain(this, 87330)">
+                                <td></td>
+                                <td class="pid">87330</td>
+                                <td>etl_user</td>
+                                <td><span class="db-badge ch">CH</span></td>
+                                <td><span class="status-badge active">active</span></td>
+                                <td>45.2s</td>
+                                <td><span class="query-text"><span class="keyword">SELECT</span> toDate(timestamp), <span class="func">count</span>(*), <span class="func">uniq</span>(user_id) <span class="keyword">FROM</span> events …</span></td>
+                            </tr>
+                            <tr onclick="showExplain(this, 87328)">
+                                <td></td>
+                                <td class="pid">87328</td>
+                                <td>app_user</td>
+                                <td><span class="db-badge pg">PG</span></td>
+                                <td><span class="status-badge idle">idle</span></td>
+                                <td>0.4s</td>
+                                <td><span class="query-text"><span class="keyword">COMMIT</span></span></td>
+                            </tr>
+                            <tr class="removed" onclick="showExplain(this, 87295)">
+                                <td><span class="delta-icon removed">✕</span></td>
+                                <td class="pid">87295</td>
+                                <td>batch_user</td>
+                                <td><span class="db-badge pg">PG</span></td>
+                                <td><span class="status-badge error">error</span></td>
+                                <td>120.0s</td>
+                                <td><span class="query-text"><span class="keyword">SELECT</span> pg_sleep(<span class="num">120</span>) — killed</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="terminal-footer">
+                <div class="footer-stats">
+                    <span class="footer-stat stat-active">Active: <span class="num" id="activeCount">4</span></span>
+                    <span class="footer-stat stat-idle">Idle: <span class="num" id="idleCount">2</span></span>
+                    <span class="footer-stat stat-blocked">Blocked: <span class="num" id="blockedCount">1</span></span>
+                    <span class="footer-stat stat-delta">New: <span class="num" id="deltaNew" style="color:var(--accent-green)">+2</span> / Done: <span class="num" id="deltaDone" style="color:var(--accent-orange)">-1</span></span>
+                    <span class="footer-stat stat-uptime"><span class="live-dot" id="liveDot"></span> <span id="uptimeText">00:12</span></span>
+                </div>
+                <div class="footer-tags">
+                    <span class="status-badge active" data-db="pg" id="tagPg">● PG 12+</span>
+                    <span class="status-badge idle" data-db="my" id="tagMy">● MySQL 8.0</span>
+                    <span class="status-badge locked" data-db="ch" id="tagCh">● CH 21.8+</span>
+                </div>
+            </div>
+            <div class="demo-notification" id="demoNotification"></div>
+            <div class="explain-popup" id="explainPopup">
+                <div class="explain-title">▸ EXPLAIN ANALYZE</div>
+                <div class="explain-line"><span class="explain-key">Node Type</span><span class="explain-val" id="expNode">—</span></div>
+                <div class="explain-line"><span class="explain-key">Actual Rows</span><span class="explain-val" id="expRows">—</span></div>
+                <div class="explain-line"><span class="explain-key">Total Cost</span><span class="explain-val" id="expCost">—</span></div>
+                <div class="explain-line"><span class="explain-key">Planning Time</span><span class="explain-val" id="expPlan">—</span></div>
+                <div class="explain-line"><span class="explain-key">Execution Time</span><span class="explain-val" id="expExec">—</span></div>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════ INTRO TEXT ════════════════════════════ -->
+        <section class="seo-intro" aria-label="О SQL-Top">
+            <p class="seo-intro-text">SQL-Top — TUI-профайлер для мониторинга PostgreSQL, MySQL и ClickHouse в реальном времени. Single binary на Go 1.25+ (~21MB, zero deps), запуск за 70ms. Diff Engine, EXPLAIN без ANALYZE, Kill Query, кольцевой буфер на 5000 запросов, Hexagonal Architecture.</p>
+        </section>
+
+        <!-- ════════════════════════════ STATS ════════════════════════════ -->
+        <section aria-labelledby="stats-title">
+            <h2 class="section-title" id="stats-title"><span class="num">01</span> В цифрах</h2>
+            <p class="section-subtitle">SQL-Top в сухих метриках — производительность, покрытие и совместимость.</p>
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-icon">🧪</div>
+                    <div class="stat-value"><span class="counter" data-target="44">0</span></div>
+                    <div class="stat-label">Unit-тестов</div>
+                    <div class="stat-tooltip">Покрытие критичных путей ~50%. 6 — sanitize, 8 — diff, 17 — UI, 4×3 — конструкторы адаптеров.</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🗄️</div>
+                    <div class="stat-value"><span class="counter" data-target="3">0</span></div>
+                    <div class="stat-label">Поддерживаемых СУБД</div>
+                    <div class="stat-tooltip">PostgreSQL 12+, MySQL 5.7+/8.0+, ClickHouse 21.8+. Единый интерфейс через Hexagonal Architecture.</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-value"><span class="counter" data-target="70" data-suffix="ms">0</span></div>
+                    <div class="stat-label">Время запуска</div>
+                    <div class="stat-tooltip">Среднее из 5 запусков на Windows (Go 1.25.0). Single binary, zero deps — без JVM, без интерпретаторов.</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-value"><span class="counter" data-target="21" data-suffix="MB">0</span></div>
+                    <div class="stat-label">Размер бинарника</div>
+                    <div class="stat-tooltip">Без сжатия UPX. Go 1.25+ с TinyGo-дружественной кодобазой. ~21MB для всех трёх адаптеров БД.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════ INSTALL ════════════════════════════ -->
+        <section id="install" aria-labelledby="install-title">
+            <h2 class="section-title" id="install-title"><span class="num">02</span> Установка</h2>
+            <p class="section-subtitle">Go 1.25+ и доступ к целевой БД — всё, что нужно. Single binary, zero dependencies.</p>
+            <div class="install-grid">
+                <div class="install-block">
+                    <div class="install-label">Через go install</div>
+                    <div class="install-cmd">
+                        <code>go install github.com/turkprogrammer/sql-top/cmd/sql-top@latest</code>
+                        <button class="copy-btn" onclick="copyCmd(this, 'go install github.com/turkprogrammer/sql-top/cmd/sql-top@latest')" aria-label="Копировать команду">Copy</button>
+                    </div>
+                </div>
+                <div class="install-block">
+                    <div class="install-label">Из исходников</div>
+                    <div class="install-cmd">
+                        <code>git clone https://github.com/turkprogrammer/sql-top.git</code>
+                        <button class="copy-btn" onclick="copyCmd(this, 'git clone https://github.com/turkprogrammer/sql-top.git')" aria-label="Копировать команду">Copy</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════ FEATURES ════════════════════════════ -->
+        <section id="features" aria-labelledby="features-title">
+            <h2 class="section-title" id="features-title"><span class="num">03</span> Возможности</h2>
+            <p class="section-subtitle">12 ключевых функций, которые делают SQL-Top незаменимым инструментом для DBA и разработчика.</p>
+            <div class="features-grid">
+                <article class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <div class="feature-num">01</div>
+                    <h3 class="feature-title">Live Monitoring</h3>
+                    <p class="feature-desc">Активные запросы обновляются каждую секунду. PID, пользователь, БД, состояние, длительность — вся информация в реальном времени.</p>
+                    <span class="feature-tag">Real-time</span>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <div class="feature-num">02</div>
+                    <h3 class="feature-title">Diff Engine</h3>
+                    <p class="feature-desc">Отслеживание новых и завершённых запросов. Delta Highlighting — изменения подсвечиваются цветом: зелёный (новый), оранжевый (завершён), голубой (изменён).</p>
+                    <span class="feature-tag">Delta</span>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">📋</div>
+                    <div class="feature-num">03</div>
+                    <h3 class="feature-title">EXPLAIN Query</h3>
+                    <p class="feature-desc">Просмотр плана выполнения запроса без выхода из TUI. Safe EXPLAIN без ANALYZE — не выполняет запрос, только показывает план.</p>
+                    <span class="feature-tag">Profiling</span>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">🛑</div>
+                    <div class="feature-num">04</div>
+                    <h3 class="feature-title">Kill Query</h3>
+                    <p class="feature-desc">Завершение долгих запросов по PID с подтверждением. Timeout настраивается через SQLTOP_KILL_TIMEOUT (по умолчанию 5s).</p>
+                    <span class="feature-tag">Safety</span>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">📜</div>
+                    <div class="feature-num">05</div>
+                    <h3 class="feature-title">Ring Buffer</h3>
+                    <p class="feature-desc">Кольцевой буфер на 5000 запросов — полная история активностей. Ни один запрос не потеряется, даже при высокой нагрузке.</p>
+                    <span class="feature-tag">History</span>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">📎</div>
+                    <div class="feature-num">06</div>
+                    <h3 class="feature-title">Copy to Clipboard</h3>
+                    <p class="feature-desc">Копирование текста запроса в буфер обмена одной клавишей (y). Подтверждение копирования с таймаутом 2 секунды.</p>
+                    <span class="feature-tag">UX</span>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <div class="feature-num">07</div>
+                    <h3 class="feature-title">Adaptive TUI</h3>
+                    <p class="feature-desc">Адаптивная вёрстка под размер терминала. Bubbletea с модальными окнами для EXPLAIN, Kill confirmation и Copy notification.</p>
+                    <span class="feature-tag">Bubbletea</span>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">🏗️</div>
+                    <div class="feature-num">08</div>
+                    <h3 class="feature-title">Hexagonal Architecture</h3>
+                    <p class="feature-desc">Ports & Adapters + Dependency Injection. Интерфейсы в domain, реализация в infrastructure. Легко добавлять новые СУБД.</p>
+                    <span class="feature-tag">Architecture</span>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-num">09</div>
+                    <h3 class="feature-title">Multi-DB Support</h3>
+                    <p class="feature-desc">PostgreSQL 12+, MySQL 5.7+/8.0+, ClickHouse 21.8+. Единый DSN-формат, общий интерфейс, специфичные для каждой СУБД детали.</p>
+                    <span class="feature-tag">3-in-1</span>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">💚</div>
+                    <div class="feature-num">10</div>
+                    <h3 class="feature-title">Graceful Shutdown</h3>
+                    <p class="feature-desc">Context cancellation + signal handling. Корректное завершение всех соединений с БД при Ctrl+C или q.</p>
+                    <span class="feature-tag">Reliability</span>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">📡</div>
+                    <div class="feature-num">11</div>
+                    <h3 class="feature-title">Ping Monitoring</h3>
+                    <p class="feature-desc">Пинг-мониторинг подключения к БД каждые 5 секунд (настраивается через SQLTOP_PING_INTERVAL). Визуальный индикатор статуса.</p>
+                    <span class="feature-tag">Health</span>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <div class="feature-num">12</div>
+                    <h3 class="feature-title">Safe EXPLAIN</h3>
+                    <p class="feature-desc">EXPLAIN без ANALYZE — план выполнения без риска модификации данных. Безопасность на первом месте, в отличие от GUI-инструментов с ANALYZE по умолчанию.</p>
+                    <span class="feature-tag">Security</span>
+                </article>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════ KEYBOARD SHORTCUTS ════════════════════════════ -->
+        <section id="shortcuts" aria-labelledby="shortcuts-title">
+            <h2 class="section-title" id="shortcuts-title"><span class="num">04</span> Горячие клавиши</h2>
+            <p class="section-subtitle">Всё управление — с клавиатуры. Минимум движений, максимум эффективности.</p>
+            <div class="shortcuts-section">
+                <table class="shortcuts-table" role="table" aria-label="Горячие клавиши SQL-Top">
+                    <thead>
+                        <tr>
+                            <th scope="col">Клавиша</th>
+                            <th scope="col">Действие</th>
+                            <th scope="col">Описание</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><kbd class="shortcut-key">↑</kbd> <kbd class="shortcut-key combo">k</kbd></td>
+                            <td class="shortcut-action">Navigation Up</td>
+                            <td class="shortcut-desc">Переместиться вверх по списку запросов</td>
+                        </tr>
+                        <tr>
+                            <td><kbd class="shortcut-key">↓</kbd> <kbd class="shortcut-key combo">j</kbd></td>
+                            <td class="shortcut-action">Navigation Down</td>
+                            <td class="shortcut-desc">Переместиться вниз по списку запросов</td>
+                        </tr>
+                        <tr>
+                            <td><kbd class="shortcut-key">Enter</kbd></td>
+                            <td class="shortcut-action">Show EXPLAIN</td>
+                            <td class="shortcut-desc">Показать план выполнения для выбранного запроса</td>
+                        </tr>
+                        <tr>
+                            <td><kbd class="shortcut-key">k</kbd></td>
+                            <td class="shortcut-action">Kill Query</td>
+                            <td class="shortcut-desc">Завершить выбранный запрос (с подтверждением)</td>
+                        </tr>
+                        <tr>
+                            <td><kbd class="shortcut-key">y</kbd></td>
+                            <td class="shortcut-action">Copy Query</td>
+                            <td class="shortcut-desc">Скопировать текст запроса в буфер обмена</td>
+                        </tr>
+                        <tr>
+                            <td><kbd class="shortcut-key">ESC</kbd></td>
+                            <td class="shortcut-action">Close Modal</td>
+                            <td class="shortcut-desc">Закрыть модальное окно (EXPLAIN / Kill confirmation)</td>
+                        </tr>
+                        <tr>
+                            <td><kbd class="shortcut-key">q</kbd></td>
+                            <td class="shortcut-action">Quit</td>
+                            <td class="shortcut-desc">Выход из приложения</td>
+                        </tr>
+                        <tr>
+                            <td><kbd class="shortcut-key combo">Ctrl+C</kbd></td>
+                            <td class="shortcut-action">Graceful Shutdown</td>
+                            <td class="shortcut-desc">Корректное завершение: закрытие соединений, освобождение ресурсов</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════ ARCHITECTURE ════════════════════════════ -->
+        <section id="arch" aria-labelledby="arch-title">
+            <h2 class="section-title" id="arch-title"><span class="num">05</span> Архитектура</h2>
+            <p class="section-subtitle">Hexagonal Architecture (Ports & Adapters) с Dependency Injection и композицией через BaseAdapter.</p>
+            <div class="arch-section">
+                <div class="arch-diagram">
+                    <div class="arch-top">
+                        <div class="arch-box main">
+                            <div class="arch-title">Composition Root</div>
+                            <div class="arch-name">cmd/sql-top</div>
+                            <div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.25rem;">DI · Graceful Shutdown</div>
+                        </div>
+                        <div class="arch-box ui">
+                            <div class="arch-title">TUI Layer</div>
+                            <div class="arch-name">internal/ui</div>
+                            <div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.25rem;">Bubbletea · Lipgloss</div>
+                        </div>
+                        <div class="arch-box domain">
+                            <div class="arch-title">Domain Layer</div>
+                            <div class="arch-name">internal/domain</div>
+                            <div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.25rem;">Interfaces (Ports)</div>
+                        </div>
+                    </div>
+
+                    <div class="arch-arrow" aria-hidden="true">▼</div>
+
+                    <div class="arch-bottom">
+                        <div class="arch-adapter pg">
+                            <span class="adapter-icon">🐘</span>
+                            <div class="adapter-name">PostgreSQL</div>
+                            <div class="adapter-desc">pgx/v5 · 12+</div>
+                        </div>
+                        <div class="arch-adapter mysql">
+                            <span class="adapter-icon">🐬</span>
+                            <div class="adapter-name">MySQL</div>
+                            <div class="adapter-desc">go-sql-driver · 5.7+</div>
+                        </div>
+                        <div class="arch-adapter ch">
+                            <span class="adapter-icon">🧊</span>
+                            <div class="adapter-name">ClickHouse</div>
+                            <div class="adapter-desc">clickhouse-go/v2 · 21.8+</div>
+                        </div>
+                    </div>
+
+                    <div class="arch-note">
+                        Каждый адаптер использует <code style="color:var(--accent-cyan);font-size:0.75rem;">*base.BaseAdapter</code> и реализует интерфейсы <code style="color:var(--accent-cyan);font-size:0.75rem;">DBConnector</code>, <code style="color:var(--accent-cyan);font-size:0.75rem;">QueryFetcher</code>, <code style="color:var(--accent-cyan);font-size:0.75rem;">QueryExplainer</code>, <code style="color:var(--accent-cyan);font-size:0.75rem;">QueryKiller</code> и <code style="color:var(--accent-cyan);font-size:0.75rem;">Pinger</code>. Logger DI через <code style="color:var(--accent-green);font-size:0.75rem;">*slog.Logger</code>.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════ COMPARISON ════════════════════════════ -->
+        <section id="comparison" aria-labelledby="comparison-title">
+            <h2 class="section-title" id="comparison-title"><span class="num">06</span> Сравнение</h2>
+            <p class="section-subtitle">SQL-Top vs альтернативы: почему Go single binary выигрывает у Python-зависимостей и тяжёлых IDE.</p>
+            <div class="comparison-section">
+                <table class="comparison-table" role="table" aria-label="Сравнение инструментов мониторинга БД">
+                    <thead>
+                        <tr>
+                            <th scope="col">Критерий</th>
+                            <th scope="col">🚀 SQL-Top</th>
+                            <th scope="col">🐍 pg_activity</th>
+                            <th scope="col">🐘 DBeaver / DataGrip</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Тип инструмента</td>
+                            <td class="win">TUI (Terminal UI)</td>
+                            <td>TUI (Terminal UI)</td>
+                            <td class="loss">GUI (Desktop IDE)</td>
+                        </tr>
+                        <tr>
+                            <td>Язык / Стек</td>
+                            <td class="win">Go (Single Binary)</td>
+                            <td class="neutral">Python (pip deps)</td>
+                            <td class="loss">Java / Eclipse</td>
+                        </tr>
+                        <tr>
+                            <td>Портативность</td>
+                            <td class="win">✅ Отличная (~21MB, zero deps)</td>
+                            <td class="neutral">⚠️ Средняя (нужен Python)</td>
+                            <td class="loss">📦 Низкая (500MB+ installer)</td>
+                        </tr>
+                        <tr>
+                            <td>Время запуска</td>
+                            <td class="win">⏱️ Мгновенно (~70ms)</td>
+                            <td class="neutral">⏱️ Быстро (&lt;500ms)</td>
+                            <td class="loss">⏳ Долго (5–15 сек)</td>
+                        </tr>
+                        <tr class="highlight-row">
+                            <td>Поддержка СУБД</td>
+                            <td class="win">🔌 PG, MySQL, ClickHouse</td>
+                            <td class="loss">❌ Только PostgreSQL</td>
+                            <td class="win">✅ Все популярные</td>
+                        </tr>
+                        <tr>
+                            <td>Безопасность</td>
+                            <td class="win">🛡️ Safe EXPLAIN (No ANALYZE)</td>
+                            <td class="loss">❌ Нет EXPLAIN в TUI</td>
+                            <td class="loss">⚠️ Опасно (ANALYZE по умолчанию)</td>
+                        </tr>
+                        <tr>
+                            <td>Нагрузка на БД</td>
+                            <td class="win">📉 Минимальная (оптимизирован)</td>
+                            <td class="neutral">Минимальная</td>
+                            <td class="neutral">📊 Зависит от плагинов</td>
+                        </tr>
+                        <tr>
+                            <td>Киллер-фича</td>
+                            <td class="win">💡 Delta Highlighting</td>
+                            <td class="neutral">Simple Monitor</td>
+                            <td class="win">Визуальный конструктор</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════ FAQ ════════════════════════════ -->
+        <section id="faq" aria-labelledby="faq-title" itemscope="" itemprop="mainEntity" itemtype="https://schema.org/FAQPage">
+            <h2 class="section-title" id="faq-title"><span class="num">07</span> Часто задаваемые вопросы (FAQ)</h2>
+
+            <div class="faq-list">
+                <details class="faq-item" itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">
+                    <summary itemprop="name">Что такое SQL-Top и для чего он нужен?</summary>
+                    <div itemscope="" itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                        <div itemprop="text">SQL-Top — это терминальный TUI-профайлер для мониторинга активных запросов к базам данных в реальном времени. Поддерживает PostgreSQL, MySQL и ClickHouse. Позволяет видеть все выполняющиеся запросы, анализировать их через EXPLAIN (без ANALYZE), завершать проблемные запросы (Kill Query) и отслеживать изменения через Diff-движок. Написан на Go 1.25+ и распространяется как single binary (~21MB) без внешних зависимостей.</div>
+                    </div>
+                </details>
+
+                <details class="faq-item" itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">
+                    <summary itemprop="name">Какие базы данных поддерживает SQL-Top?</summary>
+                    <div itemscope="" itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                        <div itemprop="text">SQL-Top поддерживает три СУБД: PostgreSQL (через pgx/v5), MySQL (через go-sql-driver/mysql) и ClickHouse (через clickhouse-go/v2). Вы можете переключаться между ними через флаг -dsn или DSN в аргументе командной строки. Разные СУБД можно мониторить в разных сессиях терминала.</div>
+                    </div>
+                </details>
+
+                <details class="faq-item" itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">
+                    <summary itemprop="name">Чем SQL-Top лучше pg_activity или DBeaver?</summary>
+                    <div itemscope="" itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                        <div itemprop="text">В отличие от pg_activity (работает только с PostgreSQL, требует Python), SQL-Top поддерживает MySQL и ClickHouse, распространяется как single binary на Go, запускается за ~70ms и не требует установки интерпретатора. По сравнению с DBeaver/DataGrip — SQL-Top не занимает 500MB+ диска, работает в терминале (удобно для серверов), и включает встроенные функции EXPLAIN без риска ANALYZE и Kill Query с подтверждением.</div>
+                    </div>
+                </details>
+
+                <details class="faq-item" itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">
+                    <summary itemprop="name">Как установить SQL-Top?</summary>
+                    <div itemscope="" itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                        <div itemprop="text">Установка одной командой: <code>go install github.com/turkprogrammer/sql-top/cmd/sql-top@latest</code>. Требуется Go 1.25+. После установки бинарник будет доступен как <code>sql-top</code>. Также можно скачать готовый бинарник со страницы релизов на GitHub.</div>
+                    </div>
+                </details>
+
+                <details class="faq-item" itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">
+                    <summary itemprop="name">Безопасно ли использовать EXPLAIN в SQL-Top?</summary>
+                    <div itemscope="" itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                        <div itemprop="text">Да. SQL-Top использует Safe EXPLAIN без ANALYZE — запрос не выполняется физически, только анализируется план выполнения. Это исключает риск модификации данных, блокировок или случайного DROP/INSERT/UPDATE при анализе. Подтверждения на Kill Query также требуют подтверждения перед отправкой.</div>
+                    </div>
+                </details>
+
+                <details class="faq-item" itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">
+                    <summary itemprop="name">Какие горячие клавиши поддерживаются в SQL-Top?</summary>
+                    <div itemscope="" itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                        <div itemprop="text">SQL-Top поддерживает полное управление с клавиатуры: <kbd>q</kbd>/<kbd>Esc</kbd> — выход, <kbd>↑</kbd>/<kbd>↓</kbd> — навигация по запросам, <kbd>e</kbd> — EXPLAIN выбранного запроса, <kbd>k</kbd> — Kill Query с подтверждением, <kbd>c</kbd> — копирование запроса в буфер обмена, <kbd>d</kbd> — переключение режима Diff, <kbd>p</kbd> — Ping-мониторинг подключения к БД. Также поддерживается выделение цветом статусов запросов: активные (зелёный), ожидающие (жёлтый), заблокированные (красный).</div>
+                    </div>
+                </details>
+            </div>
+
+            <!-- JSON-LD FAQPage -->
+            <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Что такое SQL-Top и для чего он нужен?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "SQL-Top — это терминальный TUI-профайлер для мониторинга активных запросов к базам данных в реальном времени. Поддерживает PostgreSQL, MySQL и ClickHouse. Позволяет видеть все выполняющиеся запросы, анализировать их через EXPLAIN (без ANALYZE), завершать проблемные запросы (Kill Query) и отслеживать изменения через Diff-движок. Single binary на Go 1.25+ (~21MB)."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Какие базы данных поддерживает SQL-Top?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "SQL-Top поддерживает PostgreSQL, MySQL и ClickHouse. Использует драйверы pgx/v5, go-sql-driver/mysql и clickhouse-go/v2 соответственно."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Чем SQL-Top лучше pg_activity или DBeaver?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "SQL-Top — single binary на Go (~21MB), работает без зависимостей, поддерживает PostgreSQL, MySQL и ClickHouse одновременно. pg_activity требует Python и работает только с PostgreSQL. DBeaver требует 500MB+ и Java. SQL-Top запускается за ~70мс."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Как установить SQL-Top?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "go install github.com/turkprogrammer/sql-top/cmd/sql-top@latest. Требуется Go 1.25+. Или скачать готовый бинарник со страницы релизов GitHub."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Безопасно ли использовать EXPLAIN в SQL-Top?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Да, SQL-Top использует Safe EXPLAIN без ANALYZE — запрос не выполняется, только анализируется план. Исключает риск модификации данных или блокировок."
+                        }
+                    }
+                ]
+            }
+            </script>
+        </section>
+
+        <!-- ════════════════════════════ CONFIGURATION ════════════════════════════ -->
+        <section id="config" aria-labelledby="config-title">
+            <h2 class="section-title" id="config-title"><span class="num">08</span> Конфигурация</h2>
+            <p class="section-subtitle">Настройка через константы в <code style="color:var(--accent-cyan);font-size:0.82rem;">domain/config.go</code> и переменные окружения.</p>
+
+            <div class="config-grid">
+                <div class="config-card">
+                    <div class="config-category">Подключение к БД</div>
+                    <div class="config-item"><span class="config-key">DefaultMaxConns</span><span class="config-val">2</span></div>
+                    <div class="config-item"><span class="config-key">DefaultMinConns</span><span class="config-val">1</span></div>
+                    <div class="config-item"><span class="config-key">DefaultConnMaxLifetime</span><span class="config-val">5 мин</span></div>
+                </div>
+
+                <div class="config-card">
+                    <div class="config-category">Polling</div>
+                    <div class="config-item"><span class="config-key">DefaultPollInterval</span><span class="config-val">1 сек</span></div>
+                    <div class="config-item"><span class="config-key">DefaultRingBufferCapacity</span><span class="config-val">5000</span></div>
+                </div>
+
+                <div class="config-card">
+                    <div class="config-category">UI</div>
+                    <div class="config-item"><span class="config-key">DefaultModalWidth</span><span class="config-val">80</span></div>
+                    <div class="config-item"><span class="config-key">DefaultModalHeight</span><span class="config-val">30</span></div>
+                    <div class="config-item"><span class="config-key">DefaultQueryTruncateLength</span><span class="config-val">60</span></div>
+                </div>
+
+                <div class="config-card">
+                    <div class="config-category">Timeout</div>
+                    <div class="config-item"><span class="config-key">ClipboardConfirmTimeout</span><span class="config-val">2 сек</span></div>
+                    <div class="config-item"><span class="config-key">PingInterval</span><span class="config-val">5 сек</span></div>
+                    <div class="config-item"><span class="config-key">KillQueryTimeout</span><span class="config-val">5 сек</span></div>
+                    <div class="config-item"><span class="config-key">ExplainQueryTimeout</span><span class="config-val">10 сек</span></div>
+                </div>
+
+                <div class="config-card">
+                    <div class="config-category">Переменные окружения</div>
+                    <div class="config-item"><span class="config-key"><code style="color:var(--accent-cyan);font-size:0.75rem;">SQLTOP_DEBUG</code></span><span class="config-val">0 (по умолчанию)</span></div>
+                    <div class="config-item"><span class="config-key"><code style="color:var(--accent-cyan);font-size:0.75rem;">SQLTOP_KILL_TIMEOUT</code></span><span class="config-val">5s</span></div>
+                    <div class="config-item"><span class="config-key"><code style="color:var(--accent-cyan);font-size:0.75rem;">SQLTOP_EXPLAIN_TIMEOUT</code></span><span class="config-val">10s</span></div>
+                    <div class="config-item"><span class="config-key"><code style="color:var(--accent-cyan);font-size:0.75rem;">SQLTOP_PING_INTERVAL</code></span><span class="config-val">5s</span></div>
+                    <div class="config-item"><span class="config-key"><code style="color:var(--accent-cyan);font-size:0.75rem;">SQLTOP_CLIPBOARD_TIMEOUT</code></span><span class="config-val">2s</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════ CONNECTION EXAMPLES ════════════════════════════ -->
+        <section id="connections" aria-labelledby="conn-title">
+            <h2 class="section-title" id="conn-title"><span class="num">09</span> Примеры подключения</h2>
+            <p class="section-subtitle">DSN как positional аргумент или через флаг <code style="color:var(--accent-cyan);font-size:0.82rem;">-dsn</code>. Работает из коробки.</p>
+
+            <div class="conn-grid">
+                <div class="conn-card">
+                    <div class="conn-header">
+                        <div class="conn-icon pg">PG</div>
+                        <h3 class="conn-title">PostgreSQL</h3>
+                    </div>
+                    <div class="conn-cmd">
+                        <code>sql-top postgres://postgres:***@localhost:5432/mydb</code>
+                    </div>
+                    <div class="conn-variants">
+                        <div class="conn-variant"><span class="arrow">▸</span> Удалённое с SSL: <code style="color:var(--accent-cyan);font-size:0.72rem;">postgres://user:***@db.example.com:5432/prod?sslmode=require</code></div>
+                        <div class="conn-variant"><span class="arrow">▸</span> Со схемой: <code style="color:var(--accent-cyan);font-size:0.72rem;">postgres://user:***@localhost:5432/db?search_path=analytics</code></div>
+                    </div>
+                </div>
+
+                <div class="conn-card">
+                    <div class="conn-header">
+                        <div class="conn-icon mysql">MY</div>
+                        <h3 class="conn-title">MySQL</h3>
+                    </div>
+                    <div class="conn-cmd">
+                        <code>sql-top mysql://root:***@localhost:3306/mydb</code>
+                    </div>
+                    <div class="conn-variants">
+                        <div class="conn-variant"><span class="arrow">▸</span> Удалённое: <code style="color:var(--accent-cyan);font-size:0.72rem;">mysql://app:***@db.example.com:3306/production</code></div>
+                        <div class="conn-variant"><span class="arrow">▸</span> С TLS: <code style="color:var(--accent-cyan);font-size:0.72rem;">mysql://user:***@localhost:3306/db?tls=preferred</code></div>
+                    </div>
+                </div>
+
+                <div class="conn-card">
+                    <div class="conn-header">
+                        <div class="conn-icon ch">CH</div>
+                        <h3 class="conn-title">ClickHouse</h3>
+                    </div>
+                    <div class="conn-cmd">
+                        <code>sql-top clickhouse://default:***@localhost:9000/mydb</code>
+                    </div>
+                    <div class="conn-variants">
+                        <div class="conn-variant"><span class="arrow">▸</span> Удалённое: <code style="color:var(--accent-cyan);font-size:0.72rem;">clickhouse://admin:***@clickhouse.example.com:9000/analytics</code></div>
+                        <div class="conn-variant"><span class="arrow">▸</span> С флагом -dsn: <code style="color:var(--accent-cyan);font-size:0.72rem;">sql-top -dsn postgres://user:***@host:5432/db</code></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════ STANDARDS ════════════════════════════ -->
+        <section id="standards" aria-labelledby="standards-title">
+            <h2 class="section-title" id="standards-title"><span class="num">10</span> Стандарты качества</h2>
+            <p class="section-subtitle">KISS, YAGNI, SOLID, Hexagonal Architecture — каждый принцип соблюдается на всех уровнях кода.</p>
+            <div class="config-grid">
+                <div class="config-card">
+                    <div class="config-category">Принципы</div>
+                    <div class="config-item"><span class="config-key">KISS</span><span class="config-val" style="color:var(--accent-green)">✅</span></div>
+                    <div class="config-item"><span class="config-key">YAGNI</span><span class="config-val" style="color:var(--accent-green)">✅</span></div>
+                    <div class="config-item"><span class="config-key">SOLID</span><span class="config-val" style="color:var(--accent-green)">✅</span></div>
+                    <div class="config-item"><span class="config-key">Hexagonal Architecture</span><span class="config-val" style="color:var(--accent-green)">✅</span></div>
+                    <div class="config-item"><span class="config-key">No Globals / Singletons</span><span class="config-val" style="color:var(--accent-green)">✅</span></div>
+                    <div class="config-item"><span class="config-key">Functions ≤50 LOC</span><span class="config-val" style="color:var(--accent-green)">✅</span></div>
+                </div>
+                <div class="config-card">
+                    <div class="config-category">Технологии</div>
+                    <div class="config-item"><span class="config-key">Язык</span><span class="config-val">Go 1.25+</span></div>
+                    <div class="config-item"><span class="config-key">TUI Framework</span><span class="config-val">Bubbletea</span></div>
+                    <div class="config-item"><span class="config-key">Styling</span><span class="config-val">Lipgloss</span></div>
+                    <div class="config-item"><span class="config-key">PG Driver</span><span class="config-val">pgx/v5</span></div>
+                    <div class="config-item"><span class="config-key">MySQL Driver</span><span class="config-val">go-sql-driver/mysql</span></div>
+                    <div class="config-item"><span class="config-key">CH Driver</span><span class="config-val">clickhouse-go/v2</span></div>
+                </div>
+                <div class="config-card">
+                    <div class="config-category">Error Handling</div>
+                    <div class="config-item"><span class="config-key">Error wrapping</span><span class="config-val" style="color:var(--accent-green)">✅ %w</span></div>
+                    <div class="config-item"><span class="config-key">errors.Is() сравнения</span><span class="config-val" style="color:var(--accent-green)">✅</span></div>
+                    <div class="config-item"><span class="config-key">Defensive Coding</span><span class="config-val" style="color:var(--accent-green)">✅</span></div>
+                    <div class="config-item"><span class="config-key">DSN Masking в логах</span><span class="config-val" style="color:var(--accent-green)">✅</span></div>
+                    <div class="config-item"><span class="config-key">Structured Logging</span><span class="config-val">log/slog</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════ AUTHOR ════════════════════════════ -->
+        <section id="author" aria-labelledby="author-title">
+            <h2 class="section-title" id="author-title"><span class="num">11</span> Автор</h2>
+            <div class="author-section">
+                <div class="author-card">
+                    <div class="author-info">
+                        <div class="author-name">Юсупов Роберт Рахимович</div>
+                        <div class="author-title-text">Senior Backend Engineer</div>
+                        <p class="author-bio">
+                            Production-проекты: <a href="https://turkprogrammer.github.io/fraud-engine-docs/" target="_blank" rel="noopener noreferrer">Fraud Detection Engine</a>, <a href="https://turkprogrammer.github.io/logt/" target="_blank" rel="noopener noreferrer">LogT</a>, <a href="https://turkprogrammer.github.io/mt/" target="_blank" rel="noopener noreferrer">MT</a>, Geo-mapping, Stable ID.
+                            18+ лет в разработке, Go/PHP, AI и high-load backend.
+                        </p>
+                    </div>
+                    <div class="author-links">
+                        <a class="author-link" href="https://github.com/turkprogrammer" target="_blank" rel="noopener noreferrer">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════ FOOTER ════════════════════════════ -->
+        <footer role="contentinfo">
+            <div class="footer-links">
+                <a href="https://github.com/turkprogrammer/sql-top" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="https://github.com/turkprogrammer/sql-top/releases" target="_blank" rel="noopener noreferrer">Releases</a>
+                <a href="https://github.com/turkprogrammer/sql-top/blob/master/README.md" target="_blank" rel="noopener noreferrer">Documentation</a>
+                <a href="https://github.com/turkprogrammer/sql-top/issues" target="_blank" rel="noopener noreferrer">Issues</a>
+                <a href="https://yusupov-tech.ru/" target="_blank" rel="noopener noreferrer">yusupov-tech.ru</a>
+            </div>
+            <div class="footer-built">
+                <span>Built with</span>
+                <span class="heart" aria-hidden="true">♥</span>
+                <a href="https://github.com/turkprogrammer" target="_blank" rel="noopener noreferrer" style="color: var(--accent-cyan); text-decoration: none; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">turkprogrammer</a>
+                <span style="margin:0 0.5rem;color:var(--text-muted)">·</span>
+                <a href="https://t.me/turanellervarolsun" target="_blank" rel="noopener noreferrer" style="color:var(--text-muted);text-decoration:none;transition:color 0.2s;display:inline-flex;align-items:center;gap:0.35rem;" onmouseover="this.style.color='var(--accent-cyan)'" onmouseout="this.style.color='var(--text-muted)'">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    @turanellervarolsun</a>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- ── Noscript Fallback (SEO) ── -->
+    <noscript>
+        <div class="noscript-fallback">
+            <h2>SQL-Top — Live Query Monitor</h2>
+            <p>Terminal UI профайлер для PostgreSQL, MySQL и ClickHouse на Go.</p>
+            <ul>
+                <li>44 unit-теста, покрытие ~50%</li>
+                <li>3 поддерживаемые СУБД: PostgreSQL 12+, MySQL 5.7+/8.0+, ClickHouse 21.8+</li>
+                <li>Время запуска ~70ms, размер бинарника ~21MB</li>
+                <li>Diff-движок для отслеживания новых/завершённых запросов</li>
+                <li>EXPLAIN и Kill Query без выхода из TUI</li>
+                <li>Кольцевой буфер на 5000 запросов</li>
+                <li>Hexagonal Architecture с Dependency Injection</li>
+            </ul>
+            <h3>Установка</h3>
+            <p>go install github.com/turkprogrammer/sql-top/cmd/sql-top@latest</p>
+            <h3>Быстрый старт</h3>
+            <p>sql-top postgres://user:pass@localhost:5432/db</p>
+            <p>sql-top mysql://user:pass@localhost:3306/db</p>
+            <p>sql-top clickhouse://user:pass@localhost:9000/db</p>
+            <h3>Автор</h3>
+            <p>Юсупов Роберт Рахимович — Senior Backend Engineer</p>
+        </div>
+    </noscript>
+
+    <script>
+        // ── Scroll Progress ──
+            const progressBar = document.getElementById('scrollProgress');
+            window.addEventListener('scroll', () => {
+                const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                progressBar.style.width = (scrollTop / scrollHeight * 100) + '%';
+            });
+
+            // ── Mouse Glow ──
+            const glow = document.getElementById('mouseGlow');
+            document.addEventListener('mousemove', (e) => {
+                glow.style.left = e.clientX + 'px';
+                glow.style.top = e.clientY + 'px';
+            });
+
+            // ── Copy to Clipboard ──
+            function copyCmd(btn, text) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        btn.textContent = 'Copied!';
+                        btn.classList.add('copied');
+                        setTimeout(() => {
+                            btn.textContent = 'Copy';
+                            btn.classList.remove('copied');
+                        }, 2000);
+                    }).catch(() => fallbackCopy(btn, text));
+                } else {
+                    fallbackCopy(btn, text);
+                }
+            }
+            function fallbackCopy(btn, text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    btn.textContent = 'Copied!';
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.textContent = 'Copy';
+                        btn.classList.remove('copied');
+                    }, 2000);
+                } catch (e) {
+                    btn.textContent = 'Failed';
+                    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+                }
+                document.body.removeChild(textarea);
+            }
+
+            // ── Animated Counters ──
+            function animateCounters() {
+                const counters = document.querySelectorAll('.counter');
+                counters.forEach(counter => {
+                    const target = parseInt(counter.getAttribute('data-target'));
+                    const suffix = counter.getAttribute('data-suffix') || '';
+                    const duration = 2000;
+                    const startTime = performance.now();
+                    function update(currentTime) {
+                        const elapsed = currentTime - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        const eased = 1 - Math.pow(1 - progress, 3);
+                        const current = Math.floor(eased * target);
+                        counter.textContent = current + suffix;
+                        if (progress < 1) requestAnimationFrame(update);
+                        else counter.textContent = target + suffix;
+                    }
+                    requestAnimationFrame(update);
+                });
+            }
+            const statsSection = document.querySelector('.stats-bar');
+            if (statsSection) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            animateCounters();
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                observer.observe(statsSection);
+            }
+
+            // ── Replay Demo ──
+            function replayDemo() {
+                const rows = document.querySelectorAll('#sqlTableBody tr');
+                rows.forEach((row, i) => {
+                    row.style.animation = 'none';
+                    row.style.opacity = '0';
+                    void row.offsetHeight;
+                    row.style.animation = `rowIn 0.3s ease forwards`;
+                    row.style.animationDelay = (0.3 + i * 0.2) + 's';
+                });
+                const btn = event.currentTarget;
+                btn.style.pointerEvents = 'none';
+                setTimeout(() => { btn.style.pointerEvents = 'auto'; }, 3000);
+            }
+
+            // ── Terminal command typing effect ──
+            (function typeCommand() {
+                const cmdSpan = document.querySelector('.terminal-cmd .cmd');
+                if (!cmdSpan) return;
+                const fullCmd = cmdSpan.textContent;
+                cmdSpan.textContent = '';
+                let i = 0;
+                function type() {
+                    if (i < fullCmd.length) {
+                        cmdSpan.textContent += fullCmd.charAt(i);
+                        i++;
+                        setTimeout(type, 25 + Math.random() * 20);
+                    } else {
+                        const rows = document.querySelectorAll('#sqlTableBody tr');
+                        rows.forEach((row, idx) => {
+                            row.style.animation = `rowIn 0.3s ease forwards`;
+                            row.style.animationDelay = (0.3 + idx * 0.25) + 's';
+                        });
+                    }
+                }
+                setTimeout(type, 400);
+            })();
+
+            // ── LIVE DEMO SIMULATION ──
+            const demoQueries = [
+                { pid: 87342, user: 'app_user', db: 'PG', status: 'active', duration: 2.3, query: 'SELECT u.id, u.name, o.total FROM users u JOIN orders o …' },
+                { pid: 87341, user: 'replicator', db: 'PG', status: 'idle', duration: 15.8, query: "COPY analytics_events FROM '/data/export.csv'" },
+                { pid: 87338, user: 'ml_user', db: 'PG', status: 'active', duration: 8.1, query: 'WITH features AS (SELECT …) UPDATE predictions SET score = …' },
+                { pid: 87335, user: 'analytics', db: 'MY', status: 'locked', duration: 22.7, query: 'UPDATE inventory SET quantity = quantity - 1 WHERE id = …' },
+                { pid: 87330, user: 'etl_user', db: 'CH', status: 'active', duration: 45.2, query: 'SELECT toDate(timestamp), count(*), uniq(user_id) FROM events …' },
+                { pid: 87328, user: 'app_user', db: 'PG', status: 'idle', duration: 0.4, query: 'COMMIT' },
+                { pid: 87295, user: 'batch_user', db: 'PG', status: 'error', duration: 120.0, query: 'SELECT pg_sleep(120) — killed' },
+            ];
+            const statuses = ['active', 'idle', 'active', 'locked'];
+            const statusColors = { active: 'var(--accent-green)', idle: 'var(--text-muted)', locked: 'var(--accent-orange)', error: 'var(--accent-red)' };
+            // ── Delta & uptime tracking ──
+            let deltaNew = 0, deltaDone = 0;
+            let prevCounts = { active: 4, idle: 2, blocked: 1, error: 1 };
+            const uptimeStart = Date.now();
+            const dbTagMap = { PG: 'tagPg', MY: 'tagMy', CH: 'tagCh' };
+            const explainData = {
+                87342: { node: 'Hash Join', rows: 1247, cost: '84.32..1,247.18', plan: '0.28ms', exec: '1.84ms' },
+                87341: { node: 'Seq Scan', rows: 50000, cost: '0.00..892.00', plan: '0.15ms', exec: '12.40ms' },
+                87338: { node: 'CTE Scan', rows: 342, cost: '12.40..68.20', plan: '0.42ms', exec: '3.12ms' },
+                87335: { node: 'Index Update', rows: 1, cost: '0.08..8.42', plan: '0.21ms', exec: '156.30ms', high: true },
+                87330: { node: 'Aggregate', rows: 8901, cost: '245.60..2,104.80', plan: '0.35ms', exec: '890.10ms', high: true },
+                87328: { node: 'Transaction', rows: 0, cost: '0.00..0.00', plan: '0.02ms', exec: '0.04ms' },
+                87295: { node: '—', rows: 0, cost: '—', plan: '—', exec: '—' },
+            };
+
+            function showExplain(row, pid) {
+                const popup = document.getElementById('explainPopup');
+                const data = explainData[pid] || explainData[87342];
+                document.getElementById('expNode').textContent = data.node;
+                document.getElementById('expRows').textContent = data.rows.toLocaleString();
+                document.getElementById('expCost').textContent = data.cost;
+                document.getElementById('expPlan').textContent = data.plan;
+                const execEl = document.getElementById('expExec');
+                execEl.textContent = data.exec;
+                execEl.className = 'explain-val' + (data.high ? ' high' : ' ok');
+                popup.classList.add('show');
+                document.addEventListener('click', closeExplain, { once: true });
+            }
+            function closeExplain(e) {
+                const popup = document.getElementById('explainPopup');
+                if (!popup.contains(e.target) && !e.target.closest('.sql-table tbody tr')) {
+                    popup.classList.remove('show');
+                } else {
+                    document.addEventListener('click', closeExplain, { once: true });
+                }
+            }
+
+            function showNotification(text, type) {
+                const el = document.getElementById('demoNotification');
+                el.textContent = text;
+                el.style.borderColor = type === 'new' ? 'var(--accent-green)' : type === 'kill' ? 'var(--accent-orange)' : 'var(--accent-cyan)';
+                el.style.background = type === 'new' ? 'rgba(0,230,118,0.08)' : type === 'kill' ? 'rgba(255,145,0,0.08)' : 'rgba(0,229,255,0.08)';
+                el.style.color = type === 'new' ? 'var(--accent-green)' : type === 'kill' ? 'var(--accent-orange)' : 'var(--accent-cyan)';
+                el.classList.add('show');
+                setTimeout(() => el.classList.remove('show'), 2000);
+            }
+
+            function flashStat(id, isPos) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.classList.remove('stat-flash', 'stat-flash-neg');
+                void el.offsetWidth;
+                el.classList.add(isPos ? 'stat-flash' : 'stat-flash-neg');
+            }
+
+            function glowTag(db, duration) {
+                const id = dbTagMap[db];
+                if (!id) return;
+                const tag = document.getElementById(id);
+                if (!tag) return;
+                tag.classList.add('tag-glow');
+                setTimeout(() => tag.classList.remove('tag-glow'), duration || 800);
+            }
+
+            function updateUptime() {
+                const secs = Math.floor((Date.now() - uptimeStart) / 1000);
+                const m = String(Math.floor(secs / 60)).padStart(2, '0');
+                const s = String(secs % 60).padStart(2, '0');
+                document.getElementById('uptimeText').textContent = m + ':' + s;
+            }
+
+            function updateFooterStats() {
+                const rows = document.querySelectorAll('#sqlTableBody tr');
+                let active = 0, idle = 0, blocked = 0, err = 0;
+                rows.forEach(row => {
+                    const badge = row.querySelector('.status-badge');
+                    if (!badge) return;
+                    const s = badge.textContent.trim();
+                    if (s === 'active') active++;
+                    else if (s === 'idle') idle++;
+                    else if (s === 'locked') blocked++;
+                    else if (s === 'error') err++;
+                });
+
+                function setCount(id, val, prevKey) {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const prev = prevCounts[prevKey];
+                    if (val !== prev) {
+                        el.textContent = val;
+                        flashStat(id, val > prev);
+                        prevCounts[prevKey] = val;
+                    }
+                }
+                setCount('activeCount', active, 'active');
+                setCount('idleCount', idle, 'idle');
+                setCount('blockedCount', blocked + err, 'blocked');
+
+                document.getElementById('deltaNew').textContent = '+' + deltaNew;
+                document.getElementById('deltaDone').textContent = '-' + deltaDone;
+
+                updateUptime();
+            }
+
+            function formatDuration(secs) {
+                if (secs < 1) return (secs * 1000).toFixed(0) + 'ms';
+                if (secs < 60) return secs.toFixed(1) + 's';
+                const m = Math.floor(secs / 60);
+                const s = (secs % 60).toFixed(0);
+                return m + 'm ' + s + 's';
+            }
+
+            function updateDuration(td, secs) {
+                td.textContent = formatDuration(secs);
+            }
+
+            function changeStatus(row, newStatus) {
+                const badge = row.querySelector('.status-badge');
+                if (!badge) return;
+                const old = badge.textContent.trim();
+                if (old === newStatus) return;
+                badge.textContent = newStatus;
+                badge.className = 'status-badge ' + newStatus;
+                row.classList.add('row-flash');
+                setTimeout(() => row.classList.remove('row-flash'), 600);
+                const dbEl = row.querySelector('.db-badge');
+                if (dbEl) glowTag(dbEl.textContent.trim(), 600);
+                updateFooterStats();
+            }
+
+            function simulateTick() {
+                const rows = document.querySelectorAll('#sqlTableBody tr');
+                const tbody = document.getElementById('sqlTableBody');
+
+                // 1. Update durations for active/locked rows
+                rows.forEach(row => {
+                    const badge = row.querySelector('.status-badge');
+                    const durTd = row.cells ? row.cells[5] : null;
+                    if (!badge || !durTd) return;
+                    const s = badge.textContent.trim();
+                    const pid = parseInt(row.querySelector('.pid')?.textContent || '0');
+                    const q = demoQueries.find(q => q.pid === pid);
+                    if (!q) return;
+
+                    if (s === 'active' || s === 'locked') {
+                        q.duration += 0.3 + Math.random() * 0.7;
+                        updateDuration(durTd, q.duration);
+                    }
+                });
+
+                // 2. Random status changes
+                if (Math.random() < 0.15) {
+                    const candidate = rows[Math.floor(Math.random() * Math.min(rows.length, 5))];
+                    const badge = candidate?.querySelector('.status-badge');
+                    if (badge) {
+                        const s = badge.textContent.trim();
+                        if (s === 'active') changeStatus(candidate, 'idle');
+                        else if (s === 'idle') changeStatus(candidate, 'active');
+                    }
+                }
+
+                // 3. Random unlock
+                const lockedRow = Array.from(rows).find(r =>
+                    r.querySelector('.status-badge')?.textContent.trim() === 'locked'
+                );
+                if (lockedRow && Math.random() < 0.08) {
+                    changeStatus(lockedRow, 'active');
+                    showNotification('🔓 Lock released — PID ' + lockedRow.querySelector('.pid')?.textContent, 'unlock');
+                }
+
+                // 4. Random new query arrival (rare)
+                if (Math.random() < 0.06 && rows.length < 10) {
+                    const newPid = 87300 + Math.floor(Math.random() * 100);
+                    const users = ['dev_user', 'reporting', 'analytics', 'batch_user', 'app_user'];
+                    const dbs = ['PG', 'PG', 'MY', 'CH'];
+                    const queries = [
+                        'SELECT * FROM large_table WHERE date > now() - interval 1h',
+                        'REFRESH MATERIALIZED VIEW CONCURRENTLY daily_metrics',
+                        'INSERT INTO audit_log SELECT * FROM temp_import',
+                        'SELECT pg_stat_activity WHERE state = active',
+                        'ANALYZE verbose orders',
+                    ];
+                    const user = users[Math.floor(Math.random() * users.length)];
+                    const db = dbs[Math.floor(Math.random() * dbs.length)];
+                    const qtext = queries[Math.floor(Math.random() * queries.length)];
+                    const dur = 0.5 + Math.random() * 5;
+                    const status = Math.random() < 0.7 ? 'active' : 'idle';
+                    demoQueries.push({ pid: newPid, user, db, status, duration: dur, query: qtext });
+
+                    const tr = document.createElement('tr');
+                    tr.setAttribute('onclick', `showExplain(this, ${newPid})`);
+                    tr.style.opacity = '0';
+                    tr.style.animation = 'none';
+                    tr.innerHTML = `
+                        <td><span class="delta-icon new">▸</span></td>
+                        <td class="pid">${newPid}</td>
+                        <td>${user}</td>
+                        <td><span class="db-badge ${db.toLowerCase() === 'pg' ? 'pg' : db.toLowerCase() === 'my' ? 'mysql' : 'ch'}">${db}</span></td>
+                        <td><span class="status-badge ${status}">${status}</span></td>
+                        <td>${formatDuration(dur)}</td>
+                        <td><span class="query-text"><span class="keyword">${qtext.split(' ')[0]}</span> ${qtext.split(' ').slice(1).join(' ')}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                    tr.style.animation = `rowIn 0.3s ease forwards`;
+                    tr.style.animationDelay = '0.1s';
+                    deltaNew++;
+                    glowTag(db, 1200);
+                    showNotification('🆕 New query #' + newPid + ' (' + user + ' · ' + db + ')', 'new');
+                    updateFooterStats();
+                }
+
+                // 5. Random query completion (removal)
+                if (Math.random() < 0.05 && rows.length > 4) {
+                    const candidates = Array.from(rows).filter(r =>
+                        r.querySelector('.status-badge')?.textContent.trim() === 'idle' ||
+                        r.querySelector('.status-badge')?.textContent.trim() === 'error'
+                    );
+                    if (candidates.length > 0) {
+                        const victim = candidates[Math.floor(Math.random() * candidates.length)];
+                        const pid = victim.querySelector('.pid')?.textContent;
+                        const dbEl = victim.querySelector('.db-badge');
+                        const db = dbEl ? dbEl.textContent.trim() : 'PG';
+                        const idx = demoQueries.findIndex(q => q.pid === parseInt(pid));
+                        if (idx > -1) demoQueries.splice(idx, 1);
+                        deltaDone++;
+                        glowTag(db, 1200);
+                        victim.style.transition = 'all 0.4s ease';
+                        victim.style.opacity = '0';
+                        victim.style.transform = 'translateX(-20px)';
+                        setTimeout(() => { victim.remove(); updateFooterStats(); }, 500);
+                        showNotification('✅ Query #' + pid + ' completed', 'new');
+                    }
+                }
+            }
+
+            // Start simulation loop
+            let simInterval = setInterval(simulateTick, 2500);
+            let uptimeInterval = setInterval(updateUptime, 1000);
+
+            // Restart simulation on replay
+            const origReplay = replayDemo;
+            replayDemo = function() {
+                if (simInterval) clearInterval(simInterval);
+                if (uptimeInterval) clearInterval(uptimeInterval);
+                deltaNew = 0; deltaDone = 0;
+                prevCounts = { active: 4, idle: 2, blocked: 1, error: 1 };
+                // Reset all demo data
+                demoQueries.length = 0;
+                demoQueries.push(
+                    { pid: 87342, user: 'app_user', db: 'PG', status: 'active', duration: 2.3, query: 'SELECT u.id, u.name, o.total FROM users u JOIN orders o …' },
+                    { pid: 87341, user: 'replicator', db: 'PG', status: 'idle', duration: 15.8, query: "COPY analytics_events FROM '/data/export.csv'" },
+                    { pid: 87338, user: 'ml_user', db: 'PG', status: 'active', duration: 8.1, query: 'WITH features AS (SELECT …) UPDATE predictions SET score = …' },
+                    { pid: 87335, user: 'analytics', db: 'MY', status: 'locked', duration: 22.7, query: 'UPDATE inventory SET quantity = quantity - 1 WHERE id = …' },
+                    { pid: 87330, user: 'etl_user', db: 'CH', status: 'active', duration: 45.2, query: 'SELECT toDate(timestamp), count(*), uniq(user_id) FROM events …' },
+                    { pid: 87328, user: 'app_user', db: 'PG', status: 'idle', duration: 0.4, query: 'COMMIT' },
+                    { pid: 87295, user: 'batch_user', db: 'PG', status: 'error', duration: 120.0, query: 'SELECT pg_sleep(120) — killed' },
+                );
+                document.getElementById('explainPopup').classList.remove('show');
+                origReplay();
+                setTimeout(() => {
+                    simInterval = setInterval(simulateTick, 2500);
+                    uptimeInterval = setInterval(updateUptime, 1000);
+                }, 3500);
+            };
+
+            console.log(
+                '%c SQL-Top %c Live Query Monitor %c v0.1.0 ',
+                'background:#0a0e14;color:#00e5ff;font-weight:bold;padding:4px 6px;border-radius:3px 0 0 3px;font-family:monospace;',
+                'background:#00e5ff;color:#0a0e14;padding:4px 6px;font-family:monospace;',
+                'background:#0a0e14;color:#666;padding:4px 6px;border-radius:0 3px 3px 0;font-family:monospace;'
+            );
+            console.log('🔍 GitHub: https://github.com/turkprogrammer/sql-top');
+            console.log('💬 Telegram: @turanellervarolsun');
+        </script>
+
+</body>
+</html>

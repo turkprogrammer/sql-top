@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e14"/>
+      <stop offset="100%" style="stop-color:#111520"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00e5ff"/>
+      <stop offset="100%" style="stop-color:#00e676"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="24" fill="url(#bg)"/>
+  <rect x="2" y="2" width="124" height="124" rx="22" fill="none" stroke="url(#accent)" stroke-width="1.5" opacity="0.4"/>
+  <!-- Terminal lines -->
+  <rect x="24" y="32" width="56" height="4" rx="2" fill="#00e5ff" opacity="0.9"/>
+  <rect x="24" y="44" width="40" height="4" rx="2" fill="#00e676" opacity="0.7"/>
+  <rect x="24" y="56" width="48" height="4" rx="2" fill="#00e5ff" opacity="0.5"/>
+  <!-- Arrow icon -->
+  <path d="M68 64 L82 72 L68 80 Z" fill="url(#accent)" opacity="0.8"/>
+  <!-- Pulse dot -->
+  <circle cx="86" cy="38" r="5" fill="#00e676" opacity="0.9">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Bottom bar -->
+  <rect x="24" y="92" width="80" height="2" rx="1" fill="url(#accent)" opacity="0.3"/>
+</svg>
