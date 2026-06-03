@@ -2480,34 +2480,30 @@
             console.log('🔍 GitHub: https://github.com/turkprogrammer/sql-top');
             console.log('💬 Telegram: @turanellervarolsun');
 
-            // ── Live Visitor Counter ──
+            // ── Live Visitor Counter (offline, localStorage) ──
             (function() {
                 const display = document.getElementById('counter-display');
                 if (!display) return;
 
+                // Increment per-browser counter
+                const key = 'sql_top_visits';
+                const prev = parseInt(localStorage.getItem(key) || '0');
+                const target = prev + 1;
+                localStorage.setItem(key, target);
+
                 display.textContent = '\u22EF\u22EF\u22EF';
 
-                async function getCount() {
-                    try {
-                        const resp = await fetch('https://api.counterapi.dev/v1/sql-top/visits/up');
-                        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-                        const data = await resp.json();
-                        return data.count;
-                    } catch(e) {
-                        let c = parseInt(localStorage.getItem('sql_top_visits') || '0') + 1;
-                        localStorage.setItem('sql_top_visits', c);
-                        return c;
-                    }
-                }
-
-                async function animate() {
-                    const target = await getCount();
+                function animate() {
                     display.classList.remove('loading');
-                    const steps = Math.min(target || 1, 24);
-                    const stepMs = Math.max(16, 600 / steps);
+                    const steps = Math.min(target || 1, 20);
+                    const stepMs = Math.max(16, 500 / steps);
 
-                    for (let i = 1; i <= steps; i++) {
-                        await new Promise(r => setTimeout(r, stepMs));
+                    function tick(i) {
+                        if (i > steps) {
+                            display.textContent = target.toLocaleString();
+                            display.classList.add('idle');
+                            return;
+                        }
                         const current = Math.round(target * i / steps);
                         display.textContent = current.toLocaleString();
                         if (i % 3 === 0 || i === steps) {
@@ -2515,15 +2511,17 @@
                             void display.offsetWidth;
                             display.classList.add('pop');
                         }
+                        setTimeout(function() { tick(i + 1); }, stepMs);
                     }
-
-                    display.textContent = target.toLocaleString();
-                    display.classList.remove('pop');
-                    void display.offsetWidth;
-                    display.classList.add('idle');
+                    tick(1);
                 }
 
-                animate();
+                // Render after DOM ready
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', animate);
+                } else {
+                    animate();
+                }
             })();
         </script>
 
