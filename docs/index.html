@@ -826,6 +826,12 @@
         .arch-box.main { border-color: rgba(0, 229, 255, 0.2); background: rgba(0, 229, 255, 0.03); }
         .arch-box.ui { border-color: rgba(66, 165, 245, 0.2); background: rgba(66, 165, 245, 0.03); }
         .arch-box.domain { border-color: rgba(0, 230, 118, 0.2); background: rgba(0, 230, 118, 0.03); }
+        .arch-box.base { border-color: rgba(255, 193, 7, 0.2); background: rgba(255, 193, 7, 0.03); }
+        .arch-box.base:hover { border-color: rgba(255, 193, 7, 0.5); }
+
+        .arch-base-row {
+            display: flex; justify-content: center; width: 100%;
+        }
 
         .arch-title {
             font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
@@ -937,6 +943,7 @@
 
         /* Highlight connection between Domain and Adapters */
         .arch-box.domain.connected,
+        .arch-box.base.connected,
         .arch-adapter.connected {
             border-color: var(--accent-cyan) !important;
             box-shadow: 0 0 16px rgba(0, 229, 255, 0.2), inset 0 0 12px rgba(0, 229, 255, 0.04);
@@ -1734,6 +1741,16 @@
                             <div class="arch-title">Domain Layer</div>
                             <div class="arch-name">internal/domain</div>
                             <div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.25rem;">Interfaces (Ports)</div>
+                        </div>
+                    </div>
+
+                    <div class="arch-arrow" aria-hidden="true">▼</div>
+
+                    <div class="arch-base-row">
+                        <div class="arch-box base" id="arch-base" data-tip="Композиционная структура: содержит sub-interfaces (DBConnector, QueryFetcher, QueryExplainer, QueryKiller, Pinger). Каждый адаптер встраивает *base.BaseAdapter и делегирует вызовы конкретной реализации.">
+                            <div class="arch-title">BaseAdapter</div>
+                            <div class="arch-name">internal/infrastructure/base</div>
+                            <div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.25rem;">Composition · Sub-interfaces</div>
                         </div>
                     </div>
 
@@ -2680,27 +2697,41 @@
             // ── Architecture Interaction ──
             (function() {
                 const domain = document.getElementById('arch-domain');
+                const base = document.getElementById('arch-base');
                 const tags = document.querySelectorAll('.interface-tag');
                 const adapters = document.querySelectorAll('.arch-adapter');
                 if (!domain || !tags.length) return;
 
+                function addConnected() {
+                    domain.classList.add('connected');
+                    if (base) base.classList.add('connected');
+                    adapters.forEach(function(a) { a.classList.add('connected'); });
+                }
+
+                function removeConnected() {
+                    domain.classList.remove('connected');
+                    if (base) base.classList.remove('connected');
+                    adapters.forEach(function(a) { a.classList.remove('connected'); });
+                }
+
                 tags.forEach(function(tag) {
-                    tag.addEventListener('mouseenter', function() {
-                        domain.classList.add('connected');
-                        adapters.forEach(function(a) { a.classList.add('connected'); });
-                    });
-                    tag.addEventListener('mouseleave', function() {
-                        domain.classList.remove('connected');
-                        adapters.forEach(function(a) { a.classList.remove('connected'); });
-                    });
+                    tag.addEventListener('mouseenter', addConnected);
+                    tag.addEventListener('mouseleave', removeConnected);
                 });
 
                 domain.addEventListener('mouseenter', function() {
                     adapters.forEach(function(a) { a.classList.add('connected'); });
+                    if (base) base.classList.add('connected');
                 });
                 domain.addEventListener('mouseleave', function() {
                     adapters.forEach(function(a) { a.classList.remove('connected'); });
+                    if (base) base.classList.remove('connected');
                 });
+
+                if (base) {
+                    base.addEventListener('mouseenter', addConnected);
+                    base.addEventListener('mouseleave', removeConnected);
+                }
             })();
         </script>
 
