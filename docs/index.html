@@ -1160,39 +1160,89 @@
             display: inline-flex;
             align-items: center;
             vertical-align: middle;
-            height: 18px;
+            height: 30px;
+        }
+        .counter-ring {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            position: relative;
+            background: rgba(0, 229, 255, 0.04);
+            border: 1.5px solid rgba(0, 229, 255, 0.2);
+            box-shadow: 0 0 6px rgba(0, 229, 255, 0.08), inset 0 0 6px rgba(0, 229, 255, 0.02);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .counter-ring.pop {
+            animation: ringPulse 0.4s ease-out;
+            border-color: rgba(0, 229, 255, 0.7);
+            box-shadow: 0 0 14px rgba(0, 229, 255, 0.3), inset 0 0 10px rgba(0, 229, 255, 0.06);
+        }
+        .counter-ring.idle {
+            animation: ringBreathe 3s ease-in-out infinite;
+        }
+        @keyframes ringPulse {
+            0% {
+                box-shadow:
+                    0 0 0 0 rgba(0, 229, 255, 0.5),
+                    0 0 0 0 rgba(0, 229, 255, 0.2),
+                    0 0 14px rgba(0, 229, 255, 0.3);
+            }
+            70% {
+                box-shadow:
+                    0 0 0 10px rgba(0, 229, 255, 0),
+                    0 0 0 18px rgba(0, 229, 255, 0),
+                    0 0 14px rgba(0, 229, 255, 0.3);
+            }
+            100% {
+                box-shadow:
+                    0 0 0 12px rgba(0, 229, 255, 0),
+                    0 0 0 22px rgba(0, 229, 255, 0),
+                    0 0 14px rgba(0, 229, 255, 0.3);
+            }
+        }
+        @keyframes ringBreathe {
+            0%, 100% {
+                border-color: rgba(0, 229, 255, 0.2);
+                box-shadow: 0 0 6px rgba(0, 229, 255, 0.08), inset 0 0 6px rgba(0, 229, 255, 0.02);
+            }
+            50% {
+                border-color: rgba(0, 229, 255, 0.4);
+                box-shadow: 0 0 12px rgba(0, 229, 255, 0.2), inset 0 0 10px rgba(0, 229, 255, 0.05);
+            }
         }
         .counter-digit {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 700;
             color: #00e5ff;
             text-shadow:
                 0 0 4px rgba(0, 229, 255, 0.5),
                 0 0 12px rgba(0, 229, 255, 0.2);
             letter-spacing: 0.3px;
-            min-width: 18px;
             text-align: center;
             display: inline-block;
-            transition: none;
+            transition: transform 0.15s ease;
         }
         .counter-digit.pop {
-            animation: counterPop 0.25s ease-out;
+            animation: digitPop 0.25s ease-out;
         }
-        @keyframes counterPop {
-            0% { transform: scale(1.3); text-shadow: 0 0 16px rgba(0,229,255,0.9), 0 0 40px rgba(0,229,255,0.4); }
+        @keyframes digitPop {
+            0% { transform: scale(1.35); text-shadow: 0 0 16px rgba(0,229,255,0.9), 0 0 40px rgba(0,229,255,0.4); }
             50% { transform: scale(0.92); }
             100% { transform: scale(1); text-shadow: 0 0 4px rgba(0,229,255,0.5), 0 0 12px rgba(0,229,255,0.2); }
         }
         .counter-digit.idle {
-            animation: counterBreathe 3s ease-in-out infinite;
+            animation: digitBreathe 3s ease-in-out infinite;
+        }
+        @keyframes digitBreathe {
+            0%, 100% { text-shadow: 0 0 4px rgba(0,229,255,0.5), 0 0 12px rgba(0,229,255,0.2); }
+            50% { text-shadow: 0 0 8px rgba(0,229,255,0.7), 0 0 24px rgba(0,229,255,0.3); }
         }
         .counter-digit.loading {
             opacity: 0.35;
-        }
-        @keyframes counterBreathe {
-            0%, 100% { text-shadow: 0 0 4px rgba(0,229,255,0.5), 0 0 12px rgba(0,229,255,0.2); }
-            50% { text-shadow: 0 0 8px rgba(0,229,255,0.7), 0 0 24px rgba(0,229,255,0.3); }
         }
     </style>
 </head>
@@ -1965,7 +2015,9 @@
                     @turanellervarolsun</a>
                 <span style="margin:0 0.5rem;color:var(--text-muted)">·</span>
                 <span id="visitor-counter" class="counter-wrap" title="Visits">
-                    <span class="counter-digit loading" id="counter-display"><!-- counter --></span>
+                    <span class="counter-ring" id="counter-ring">
+                        <span class="counter-digit loading" id="counter-display"><!-- counter --></span>
+                    </span>
                 </span>
             </div>
         </footer>
@@ -2483,7 +2535,8 @@
             // ── Live Visitor Counter (offline, localStorage) ──
             (function() {
                 const display = document.getElementById('counter-display');
-                if (!display) return;
+                const ring = document.getElementById('counter-ring');
+                if (!display || !ring) return;
 
                 // Increment per-browser counter
                 const key = 'sql_top_visits';
@@ -2495,6 +2548,7 @@
 
                 function animate() {
                     display.classList.remove('loading');
+                    ring.classList.remove('loading');
                     const steps = Math.min(target || 1, 20);
                     const stepMs = Math.max(16, 500 / steps);
 
@@ -2502,14 +2556,18 @@
                         if (i > steps) {
                             display.textContent = target.toLocaleString();
                             display.classList.add('idle');
+                            ring.classList.add('idle');
                             return;
                         }
                         const current = Math.round(target * i / steps);
                         display.textContent = current.toLocaleString();
                         if (i % 3 === 0 || i === steps) {
                             display.classList.remove('pop');
+                            ring.classList.remove('pop');
                             void display.offsetWidth;
+                            void ring.offsetWidth;
                             display.classList.add('pop');
+                            ring.classList.add('pop');
                         }
                         setTimeout(function() { tick(i + 1); }, stepMs);
                     }
