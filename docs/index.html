@@ -866,6 +866,93 @@
             font-size: 0.72rem; color: var(--text-muted); text-align: center;
             padding-top: 1rem; border-top: 1px solid var(--grid-line); margin-top: 1.5rem;
         }
+        .note-line { margin: 0.25rem 0; }
+        .note-tags { display: flex; gap: 0.4rem; justify-content: center; flex-wrap: wrap; margin: 0.5rem 0 0.25rem; }
+
+        .interface-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem; padding: 0.2rem 0.5rem;
+            border-radius: 4px; border: 1px solid rgba(0, 229, 255, 0.15);
+            background: rgba(0, 229, 255, 0.05);
+            color: var(--accent-cyan);
+            cursor: help;
+            transition: all 0.25s ease;
+        }
+        .interface-tag:hover {
+            background: rgba(0, 229, 255, 0.15);
+            border-color: rgba(0, 229, 255, 0.4);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
+        }
+
+        /* Tooltips via data-tip */
+        [data-tip] {
+            position: relative;
+            cursor: help;
+        }
+        [data-tip]::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%) scale(0.92);
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            color: var(--text-bright);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-family: system-ui, sans-serif;
+            font-size: 0.65rem;
+            font-weight: 400;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 229, 255, 0.05);
+            z-index: 20;
+            text-transform: none;
+            letter-spacing: normal;
+            line-height: 1.4;
+        }
+        [data-tip]:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+        [data-tip]::before {
+            content: '';
+            position: absolute;
+            bottom: calc(100% + 5px);
+            left: 50%;
+            transform: translateX(-50%) scaleY(0);
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 229, 255, 0.3);
+            opacity: 0;
+            transition: all 0.2s ease;
+            z-index: 20;
+            pointer-events: none;
+        }
+        [data-tip]:hover::before {
+            opacity: 1;
+            transform: translateX(-50%) scaleY(1);
+        }
+
+        /* Highlight connection between Domain and Adapters */
+        .arch-box.domain.connected,
+        .arch-adapter.connected {
+            border-color: var(--accent-cyan) !important;
+            box-shadow: 0 0 16px rgba(0, 229, 255, 0.2), inset 0 0 12px rgba(0, 229, 255, 0.04);
+            transform: translateY(-2px);
+        }
+
+        /* Animated flow arrow */
+        @keyframes archFlow {
+            0% { opacity: 0.3; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(4px); text-shadow: 0 0 8px var(--accent-cyan); }
+            100% { opacity: 0.3; transform: translateY(0); }
+        }
+        .arch-arrow {
+            color: var(--text-muted); font-size: 1.2rem; text-align: center;
+            animation: archFlow 2.5s ease-in-out infinite;
+        }
 
         /* ── Comparison Table ── */
         .comparison-section {
@@ -1633,17 +1720,17 @@
             <div class="arch-section">
                 <div class="arch-diagram">
                     <div class="arch-top">
-                        <div class="arch-box main">
+                        <div class="arch-box main" data-tip="Точка входа: парсинг DSN, выбор адаптера, DI-контейнер, graceful shutdown. Всё собирается в cmd/sql-top/main.go">
                             <div class="arch-title">Composition Root</div>
                             <div class="arch-name">cmd/sql-top</div>
                             <div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.25rem;">DI · Graceful Shutdown</div>
                         </div>
-                        <div class="arch-box ui">
+                        <div class="arch-box ui" data-tip="Bubbletea TUI: таблица запросов, fetchLoop (2.5s), pingLoop (5s), diff-движок, горячие клавиши (k/Kill, e/Explain, r/Replay)">
                             <div class="arch-title">TUI Layer</div>
                             <div class="arch-name">internal/ui</div>
                             <div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.25rem;">Bubbletea · Lipgloss</div>
                         </div>
-                        <div class="arch-box domain">
+                        <div class="arch-box domain" id="arch-domain" data-tip="Ports: интерфейсы DBProvider, QueryFetcher, QueryExplainer, QueryKiller, Pinger. Не привязаны к конкретной СУБД.">
                             <div class="arch-title">Domain Layer</div>
                             <div class="arch-name">internal/domain</div>
                             <div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.25rem;">Interfaces (Ports)</div>
@@ -1653,17 +1740,17 @@
                     <div class="arch-arrow" aria-hidden="true">▼</div>
 
                     <div class="arch-bottom">
-                        <div class="arch-adapter pg">
+                        <div class="arch-adapter pg" data-tip="pgx/v5 · PostgreSQL 12+. Connector, Fetcher, Explainer, Killer, Pinger">
                             <span class="adapter-icon">🐘</span>
                             <div class="adapter-name">PostgreSQL</div>
                             <div class="adapter-desc">pgx/v5 · 12+</div>
                         </div>
-                        <div class="arch-adapter mysql">
+                        <div class="arch-adapter mysql" data-tip="go-sql-driver · MySQL 5.7+/8.0+. Connector, Fetcher, Explainer, Killer, Pinger">
                             <span class="adapter-icon">🐬</span>
                             <div class="adapter-name">MySQL</div>
                             <div class="adapter-desc">go-sql-driver · 5.7+</div>
                         </div>
-                        <div class="arch-adapter ch">
+                        <div class="arch-adapter ch" data-tip="clickhouse-go/v2 · ClickHouse 21.8+. Connector, Fetcher, Explainer, Killer, Pinger">
                             <span class="adapter-icon">🧊</span>
                             <div class="adapter-name">ClickHouse</div>
                             <div class="adapter-desc">clickhouse-go/v2 · 21.8+</div>
@@ -1671,7 +1758,15 @@
                     </div>
 
                     <div class="arch-note">
-                        Каждый адаптер использует <code style="color:var(--accent-cyan);font-size:0.75rem;">*base.BaseAdapter</code> и реализует интерфейсы <code style="color:var(--accent-cyan);font-size:0.75rem;">DBConnector</code>, <code style="color:var(--accent-cyan);font-size:0.75rem;">QueryFetcher</code>, <code style="color:var(--accent-cyan);font-size:0.75rem;">QueryExplainer</code>, <code style="color:var(--accent-cyan);font-size:0.75rem;">QueryKiller</code> и <code style="color:var(--accent-cyan);font-size:0.75rem;">Pinger</code>. Logger DI через <code style="color:var(--accent-green);font-size:0.75rem;">*slog.Logger</code>.
+                        <div class="note-line">Каждый адаптер встраивает <code>*base.BaseAdapter</code> и реализует порты:</div>
+                        <div class="note-tags">
+                            <span class="interface-tag" data-tip="Подключение к СУБД">DBConnector</span>
+                            <span class="interface-tag" data-tip="Получение списка активных запросов">QueryFetcher</span>
+                            <span class="interface-tag" data-tip="EXPLAIN запроса без ANALYZE">QueryExplainer</span>
+                            <span class="interface-tag" data-tip="Принудительное завершение запроса (pg_terminate_backend / KILL)">QueryKiller</span>
+                            <span class="interface-tag" data-tip="Проверка доступности СУБД (Ping)">Pinger</span>
+                        </div>
+                        <div class="note-line" style="margin-top:0.6rem;">Logger DI: <code style="color:var(--accent-green);">*slog.Logger</code> через конструктор</div>
                     </div>
                 </div>
             </div>
@@ -2580,6 +2675,32 @@
                 } else {
                     animate();
                 }
+            })();
+
+            // ── Architecture Interaction ──
+            (function() {
+                const domain = document.getElementById('arch-domain');
+                const tags = document.querySelectorAll('.interface-tag');
+                const adapters = document.querySelectorAll('.arch-adapter');
+                if (!domain || !tags.length) return;
+
+                tags.forEach(function(tag) {
+                    tag.addEventListener('mouseenter', function() {
+                        domain.classList.add('connected');
+                        adapters.forEach(function(a) { a.classList.add('connected'); });
+                    });
+                    tag.addEventListener('mouseleave', function() {
+                        domain.classList.remove('connected');
+                        adapters.forEach(function(a) { a.classList.remove('connected'); });
+                    });
+                });
+
+                domain.addEventListener('mouseenter', function() {
+                    adapters.forEach(function(a) { a.classList.add('connected'); });
+                });
+                domain.addEventListener('mouseleave', function() {
+                    adapters.forEach(function(a) { a.classList.remove('connected'); });
+                });
             })();
         </script>
 
