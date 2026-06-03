@@ -829,10 +829,6 @@
         .arch-box.base { border-color: rgba(255, 193, 7, 0.2); background: rgba(255, 193, 7, 0.03); }
         .arch-box.base:hover { border-color: rgba(255, 193, 7, 0.5); }
 
-        .arch-base-row {
-            display: flex; justify-content: center; width: 100%;
-        }
-
         .arch-title {
             font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
             color: var(--text-muted); margin-bottom: 0.25rem;
@@ -1742,11 +1738,6 @@
                             <div class="arch-name">internal/domain</div>
                             <div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.25rem;">Interfaces (Ports)</div>
                         </div>
-                    </div>
-
-                    <div class="arch-arrow" aria-hidden="true">▼</div>
-
-                    <div class="arch-base-row">
                         <div class="arch-box base" id="arch-base" data-tip="Композиционная структура: содержит sub-interfaces (DBConnector, QueryFetcher, QueryExplainer, QueryKiller, Pinger). Каждый адаптер встраивает *base.BaseAdapter и делегирует вызовы конкретной реализации.">
                             <div class="arch-title">BaseAdapter</div>
                             <div class="arch-name">internal/infrastructure/base</div>
