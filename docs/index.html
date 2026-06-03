@@ -1187,6 +1187,9 @@
         .counter-digit.idle {
             animation: counterBreathe 3s ease-in-out infinite;
         }
+        .counter-digit.loading {
+            opacity: 0.35;
+        }
         @keyframes counterBreathe {
             0%, 100% { text-shadow: 0 0 4px rgba(0,229,255,0.5), 0 0 12px rgba(0,229,255,0.2); }
             50% { text-shadow: 0 0 8px rgba(0,229,255,0.7), 0 0 24px rgba(0,229,255,0.3); }
@@ -1962,7 +1965,7 @@
                     @turanellervarolsun</a>
                 <span style="margin:0 0.5rem;color:var(--text-muted)">·</span>
                 <span id="visitor-counter" class="counter-wrap" title="Visits">
-                    <span class="counter-digit" id="counter-display">0</span>
+                    <span class="counter-digit loading" id="counter-display"><!-- counter --></span>
                 </span>
             </div>
         </footer>
@@ -2482,39 +2485,45 @@
                 const display = document.getElementById('counter-display');
                 if (!display) return;
 
-                async function fetchAndAnimate() {
+                display.textContent = '\u22EF\u22EF\u22EF';
+
+                async function getCount() {
                     try {
                         const resp = await fetch('https://api.counterapi.dev/v1/sql-top/visits/up');
-                        if (!resp.ok) { display.textContent = '\u2726'; return; }
+                        if (!resp.ok) throw new Error('HTTP ' + resp.status);
                         const data = await resp.json();
-                        const target = data.count;
-                        if (typeof target !== 'number') { display.textContent = '\u2726'; return; }
-
-                        const steps = Math.min(target, 30);
-                        const stepMs = steps < 1 ? 0 : Math.max(20, 800 / steps);
-
-                        for (let i = 1; i <= steps; i++) {
-                            await new Promise(r => setTimeout(r, stepMs));
-                            const current = Math.round(target * i / steps);
-                            display.textContent = current.toLocaleString();
-                            if (i % 3 === 0 || i === steps) {
-                                display.classList.remove('pop');
-                                void display.offsetWidth;
-                                display.classList.add('pop');
-                            }
-                        }
-
-                        display.textContent = target.toLocaleString();
-                        display.classList.remove('pop');
-                        void display.offsetWidth;
-                        display.classList.add('idle');
-
+                        return data.count;
                     } catch(e) {
-                        display.textContent = '\u2726';
+                        let c = parseInt(localStorage.getItem('sql_top_visits') || '0') + 1;
+                        localStorage.setItem('sql_top_visits', c);
+                        return c;
                     }
                 }
 
-                fetchAndAnimate();
+                async function animate() {
+                    const target = await getCount();
+                    display.classList.remove('loading');
+                    const steps = Math.min(target || 1, 24);
+                    const stepMs = Math.max(16, 600 / steps);
+
+                    for (let i = 1; i <= steps; i++) {
+                        await new Promise(r => setTimeout(r, stepMs));
+                        const current = Math.round(target * i / steps);
+                        display.textContent = current.toLocaleString();
+                        if (i % 3 === 0 || i === steps) {
+                            display.classList.remove('pop');
+                            void display.offsetWidth;
+                            display.classList.add('pop');
+                        }
+                    }
+
+                    display.textContent = target.toLocaleString();
+                    display.classList.remove('pop');
+                    void display.offsetWidth;
+                    display.classList.add('idle');
+                }
+
+                animate();
             })();
         </script>
 
