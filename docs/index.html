@@ -342,6 +342,18 @@
             max-width: 60ch;
         }
 
+        /* ── Scramble Text ── */
+        .scramble-text { display: inline; }
+        .scramble-text.scrambling {
+            color: var(--accent-cyan);
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+            transition: color 0.3s, text-shadow 0.3s;
+        }
+        .scramble-text.scrambled {
+            color: var(--text-bright);
+            text-shadow: none;
+        }
+
         /* ── Terminal Demo ── */
         .terminal-demo {
             background: rgba(26, 19, 17, 0.25);
@@ -465,6 +477,18 @@
         .status-badge.idle { color: var(--text-muted); background: rgba(255, 255, 255, 0.05); }
         .status-badge.locked { color: var(--accent-orange); background: rgba(255, 145, 0, 0.1); }
         .status-badge.error { color: var(--accent-red); background: rgba(255, 82, 82, 0.1); }
+        .status-badge.idle-in-txn { color: var(--accent-yellow); background: rgba(255, 193, 7, 0.1); }
+
+        .wait-event {
+            display: inline-block; font-size: 0.6rem; letter-spacing: 0.03em;
+            color: var(--text-muted); font-family: var(--font-mono);
+        }
+        .wait-event.client-read { color: #64b5f6; }
+        .wait-event.io { color: #a1887f; }
+        .wait-event.pg-sleep { color: #ce93d8; }
+        .wait-event.lock { color: var(--accent-orange); }
+        .wait-event.extended { color: #90a4ae; }
+        .wait-event.transaction { color: #ffe082; }
 
         .db-badge {
             display: inline-block; padding: 0.1rem 0.35rem;
@@ -1196,6 +1220,7 @@
                                 <th scope="col">User</th>
                                 <th scope="col">DB</th>
                                 <th scope="col">State</th>
+                                <th scope="col">WaitEvent</th>
                                 <th scope="col">Duration</th>
                                 <th scope="col">Query</th>
                             </tr>
@@ -1207,6 +1232,7 @@
                                 <td>app_user</td>
                                 <td><span class="db-badge pg">PG</span></td>
                                 <td><span class="status-badge active">active</span></td>
+                                <td><span class="wait-event client-read">ClientRead</span></td>
                                 <td>2.3s</td>
                                 <td><span class="query-text"><span class="keyword">SELECT</span> u.id, u.name, o.total <span class="keyword">FROM</span> users u <span class="keyword">JOIN</span> orders o …</span></td>
                             </tr>
@@ -1216,6 +1242,7 @@
                                 <td>replicator</td>
                                 <td><span class="db-badge pg">PG</span></td>
                                 <td><span class="status-badge idle">idle</span></td>
+                                <td><span class="wait-event">—</span></td>
                                 <td>15.8s</td>
                                 <td><span class="query-text"><span class="keyword">COPY</span> analytics_events <span class="keyword">FROM</span> <span class="str">'/data/export.csv'</span></span></td>
                             </tr>
@@ -1225,6 +1252,7 @@
                                 <td>ml_user</td>
                                 <td><span class="db-badge pg">PG</span></td>
                                 <td><span class="status-badge active">active</span></td>
+                                <td><span class="wait-event extended">ExtendedQuery</span></td>
                                 <td>8.1s</td>
                                 <td><span class="query-text"><span class="keyword">WITH</span> features <span class="keyword">AS</span> (<span class="keyword">SELECT</span> …) <span class="keyword">UPDATE</span> predictions <span class="keyword">SET</span> score = …</span></td>
                             </tr>
@@ -1234,6 +1262,7 @@
                                 <td>analytics</td>
                                 <td><span class="db-badge mysql">MY</span></td>
                                 <td><span class="status-badge locked">locked</span></td>
+                                <td><span class="wait-event lock">Lock</span></td>
                                 <td>22.7s</td>
                                 <td><span class="query-text"><span class="keyword">UPDATE</span> inventory <span class="keyword">SET</span> quantity = quantity - <span class="num">1</span> <span class="keyword">WHERE</span> id = …</span></td>
                             </tr>
@@ -1243,6 +1272,7 @@
                                 <td>etl_user</td>
                                 <td><span class="db-badge ch">CH</span></td>
                                 <td><span class="status-badge active">active</span></td>
+                                <td><span class="wait-event io">IO</span></td>
                                 <td>45.2s</td>
                                 <td><span class="query-text"><span class="keyword">SELECT</span> toDate(timestamp), <span class="func">count</span>(*), <span class="func">uniq</span>(user_id) <span class="keyword">FROM</span> events …</span></td>
                             </tr>
@@ -1252,6 +1282,7 @@
                                 <td>app_user</td>
                                 <td><span class="db-badge pg">PG</span></td>
                                 <td><span class="status-badge idle">idle</span></td>
+                                <td><span class="wait-event">—</span></td>
                                 <td>0.4s</td>
                                 <td><span class="query-text"><span class="keyword">COMMIT</span></span></td>
                             </tr>
@@ -1261,6 +1292,7 @@
                                 <td>batch_user</td>
                                 <td><span class="db-badge pg">PG</span></td>
                                 <td><span class="status-badge error">error</span></td>
+                                <td><span class="wait-event pg-sleep">PgSleep</span></td>
                                 <td>120.0s</td>
                                 <td><span class="query-text"><span class="keyword">SELECT</span> pg_sleep(<span class="num">120</span>) — killed</span></td>
                             </tr>
@@ -1301,7 +1333,7 @@
 
         <!-- ════════════════════════════ STATS ════════════════════════════ -->
         <section aria-labelledby="stats-title">
-            <h2 class="section-title" id="stats-title"><span class="num">01</span> В цифрах</h2>
+            <h2 class="section-title" id="stats-title" data-scramble><span class="num">01</span><span class="scramble-text"> В цифрах</span></h2>
             <p class="section-subtitle">SQL-Top в сухих метриках — производительность, покрытие и совместимость.</p>
             <div class="stats-bar">
                 <div class="stat-card">
@@ -1333,7 +1365,7 @@
 
         <!-- ════════════════════════════ INSTALL ════════════════════════════ -->
         <section id="install" aria-labelledby="install-title">
-            <h2 class="section-title" id="install-title"><span class="num">02</span> Установка</h2>
+            <h2 class="section-title" id="install-title" data-scramble><span class="num">02</span><span class="scramble-text"> Установка</span></h2>
             <p class="section-subtitle">Go 1.25+ и доступ к целевой БД — всё, что нужно. Single binary, zero dependencies.</p>
             <div class="install-grid">
                 <div class="install-block">
@@ -1355,7 +1387,7 @@
 
         <!-- ════════════════════════════ FEATURES ════════════════════════════ -->
         <section id="features" aria-labelledby="features-title">
-            <h2 class="section-title" id="features-title"><span class="num">03</span> Возможности</h2>
+            <h2 class="section-title" id="features-title" data-scramble><span class="num">03</span><span class="scramble-text"> Возможности</span></h2>
             <p class="section-subtitle">12 ключевых функций, которые делают SQL-Top незаменимым инструментом для DBA и разработчика.</p>
             <div class="features-grid">
                 <article class="feature-card">
@@ -1447,7 +1479,7 @@
 
         <!-- ════════════════════════════ KEYBOARD SHORTCUTS ════════════════════════════ -->
         <section id="shortcuts" aria-labelledby="shortcuts-title">
-            <h2 class="section-title" id="shortcuts-title"><span class="num">04</span> Горячие клавиши</h2>
+            <h2 class="section-title" id="shortcuts-title" data-scramble><span class="num">04</span><span class="scramble-text"> Горячие клавиши</span></h2>
             <p class="section-subtitle">Всё управление — с клавиатуры. Минимум движений, максимум эффективности.</p>
             <div class="shortcuts-section">
                 <table class="shortcuts-table" role="table" aria-label="Горячие клавиши SQL-Top">
@@ -1506,7 +1538,7 @@
 
         <!-- ════════════════════════════ ARCHITECTURE ════════════════════════════ -->
         <section id="arch" aria-labelledby="arch-title">
-            <h2 class="section-title" id="arch-title"><span class="num">05</span> Архитектура</h2>
+            <h2 class="section-title" id="arch-title" data-scramble><span class="num">05</span><span class="scramble-text"> Архитектура</span></h2>
             <p class="section-subtitle">Hexagonal Architecture (Ports & Adapters) с Dependency Injection и композицией через BaseAdapter.</p>
             <div class="arch-section">
                 <div class="arch-diagram">
@@ -1557,7 +1589,7 @@
 
         <!-- ════════════════════════════ COMPARISON ════════════════════════════ -->
         <section id="comparison" aria-labelledby="comparison-title">
-            <h2 class="section-title" id="comparison-title"><span class="num">06</span> Сравнение</h2>
+            <h2 class="section-title" id="comparison-title" data-scramble><span class="num">06</span><span class="scramble-text"> Сравнение</span></h2>
             <p class="section-subtitle">SQL-Top vs альтернативы: почему Go single binary выигрывает у Python-зависимостей и тяжёлых IDE.</p>
             <div class="comparison-section">
                 <table class="comparison-table" role="table" aria-label="Сравнение инструментов мониторинга БД">
@@ -1625,7 +1657,7 @@
 
         <!-- ════════════════════════════ FAQ ════════════════════════════ -->
         <section id="faq" aria-labelledby="faq-title" itemscope="" itemprop="mainEntity" itemtype="https://schema.org/FAQPage">
-            <h2 class="section-title" id="faq-title"><span class="num">07</span> Часто задаваемые вопросы (FAQ)</h2>
+            <h2 class="section-title" id="faq-title" data-scramble><span class="num">07</span><span class="scramble-text"> Часто задаваемые вопросы (FAQ)</span></h2>
 
             <div class="faq-list">
                 <details class="faq-item" itemscope="" itemprop="mainEntity" itemtype="https://schema.org/Question">
@@ -1724,7 +1756,7 @@
 
         <!-- ════════════════════════════ CONFIGURATION ════════════════════════════ -->
         <section id="config" aria-labelledby="config-title">
-            <h2 class="section-title" id="config-title"><span class="num">08</span> Конфигурация</h2>
+            <h2 class="section-title" id="config-title" data-scramble><span class="num">08</span><span class="scramble-text"> Конфигурация</span></h2>
             <p class="section-subtitle">Настройка через константы в <code style="color:var(--accent-cyan);font-size:0.82rem;">domain/config.go</code> и переменные окружения.</p>
 
             <div class="config-grid">
@@ -1769,7 +1801,7 @@
 
         <!-- ════════════════════════════ CONNECTION EXAMPLES ════════════════════════════ -->
         <section id="connections" aria-labelledby="conn-title">
-            <h2 class="section-title" id="conn-title"><span class="num">09</span> Примеры подключения</h2>
+            <h2 class="section-title" id="conn-title" data-scramble><span class="num">09</span><span class="scramble-text"> Примеры подключения</span></h2>
             <p class="section-subtitle">DSN как positional аргумент или через флаг <code style="color:var(--accent-cyan);font-size:0.82rem;">-dsn</code>. Работает из коробки.</p>
 
             <div class="conn-grid">
@@ -1819,7 +1851,7 @@
 
         <!-- ════════════════════════════ STANDARDS ════════════════════════════ -->
         <section id="standards" aria-labelledby="standards-title">
-            <h2 class="section-title" id="standards-title"><span class="num">10</span> Стандарты качества</h2>
+            <h2 class="section-title" id="standards-title" data-scramble><span class="num">10</span><span class="scramble-text"> Стандарты качества</span></h2>
             <p class="section-subtitle">KISS, YAGNI, SOLID, Hexagonal Architecture — каждый принцип соблюдается на всех уровнях кода.</p>
             <div class="config-grid">
                 <div class="config-card">
@@ -1853,7 +1885,7 @@
 
         <!-- ════════════════════════════ AUTHOR ════════════════════════════ -->
         <section id="author" aria-labelledby="author-title">
-            <h2 class="section-title" id="author-title"><span class="num">11</span> Автор</h2>
+            <h2 class="section-title" id="author-title" data-scramble><span class="num">11</span><span class="scramble-text"> Автор</span></h2>
             <div class="author-section">
                 <div class="author-card">
                     <div class="author-info">
@@ -1891,6 +1923,8 @@
                 <a href="https://t.me/turanellervarolsun" target="_blank" rel="noopener noreferrer" style="color:var(--text-muted);text-decoration:none;transition:color 0.2s;display:inline-flex;align-items:center;gap:0.35rem;" onmouseover="this.style.color='var(--accent-cyan)'" onmouseout="this.style.color='var(--text-muted)'">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
                     @turanellervarolsun</a>
+                <span style="margin:0 0.5rem;color:var(--text-muted)">·</span>
+                <img src="https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fturkprogrammer.github.io%2Fsql-top&label=Visits&countColor=%2300e5ff&labelStyle=none" alt="Visitor counter" style="height:16px;vertical-align:middle;border-radius:2px;opacity:0.8;" loading="lazy">
             </div>
         </footer>
 
@@ -1922,141 +1956,188 @@
     </noscript>
 
     <script>
+        // ── Scramble Effect ──
+        function setupScramble() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()<>?/';
+            const targets = document.querySelectorAll('[data-scramble] .scramble-text');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    const el = entry.target;
+                    const finalText = el.textContent;
+                    if (!finalText.trim()) return;
+                    const steps = 12;
+                    const stepMs = 700 / steps;
+                    let step = 0;
+                    el.classList.add('scrambling');
+                    function tick() {
+                        step++;
+                        const resolved = Math.floor((step / steps) * finalText.length);
+                        let result = '';
+                        for (let i = 0; i < finalText.length; i++) {
+                            if (finalText[i] === ' ' || finalText[i] === '\n') {
+                                result += finalText[i];
+                            } else if (i < resolved) {
+                                result += finalText[i];
+                            } else {
+                                result += chars[Math.floor(Math.random() * chars.length)];
+                            }
+                        }
+                        el.textContent = result;
+                        if (step < steps) {
+                            setTimeout(tick, stepMs);
+                        } else {
+                            el.textContent = finalText;
+                            el.classList.remove('scrambling');
+                            el.classList.add('scrambled');
+                        }
+                    }
+                    tick();
+                    observer.unobserve(el);
+                });
+            }, { threshold: 0.4 });
+            targets.forEach(t => observer.observe(t));
+        }
+        setupScramble();
+
         // ── Scroll Progress ──
-            const progressBar = document.getElementById('scrollProgress');
-            window.addEventListener('scroll', () => {
-                const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-                const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-                progressBar.style.width = (scrollTop / scrollHeight * 100) + '%';
-            });
+        const progressBar = document.getElementById('scrollProgress');
+        window.addEventListener('scroll', () => {
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            progressBar.style.width = (scrollTop / scrollHeight * 100) + '%';
+        });
 
-            // ── Mouse Glow ──
-            const glow = document.getElementById('mouseGlow');
-            document.addEventListener('mousemove', (e) => {
-                glow.style.left = e.clientX + 'px';
-                glow.style.top = e.clientY + 'px';
-            });
+        // ── Mouse Glow ──
+        const glow = document.getElementById('mouseGlow');
+        document.addEventListener('mousemove', (e) => {
+            glow.style.left = e.clientX + 'px';
+            glow.style.top = e.clientY + 'px';
+        });
 
-            // ── Copy to Clipboard ──
-            function copyCmd(btn, text) {
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(text).then(() => {
-                        btn.textContent = 'Copied!';
-                        btn.classList.add('copied');
-                        setTimeout(() => {
-                            btn.textContent = 'Copy';
-                            btn.classList.remove('copied');
-                        }, 2000);
-                    }).catch(() => fallbackCopy(btn, text));
-                } else {
-                    fallbackCopy(btn, text);
-                }
-            }
-            function fallbackCopy(btn, text) {
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                textarea.style.position = 'fixed';
-                textarea.style.opacity = '0';
-                document.body.appendChild(textarea);
-                textarea.select();
-                try {
-                    document.execCommand('copy');
+        // ── Copy to Clipboard ──
+        function copyCmd(btn, text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
                     btn.textContent = 'Copied!';
                     btn.classList.add('copied');
                     setTimeout(() => {
                         btn.textContent = 'Copy';
                         btn.classList.remove('copied');
                     }, 2000);
-                } catch (e) {
-                    btn.textContent = 'Failed';
-                    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
-                }
-                document.body.removeChild(textarea);
+                }).catch(() => fallbackCopy(btn, text));
+            } else {
+                fallbackCopy(btn, text);
             }
+        }
+        function fallbackCopy(btn, text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            } catch (e) {
+                btn.textContent = 'Failed';
+                setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+            }
+            document.body.removeChild(textarea);
+        }
 
-            // ── Animated Counters ──
-            function animateCounters() {
-                const counters = document.querySelectorAll('.counter');
-                counters.forEach(counter => {
-                    const target = parseInt(counter.getAttribute('data-target'));
-                    const suffix = counter.getAttribute('data-suffix') || '';
-                    const duration = 2000;
-                    const startTime = performance.now();
-                    function update(currentTime) {
-                        const elapsed = currentTime - startTime;
-                        const progress = Math.min(elapsed / duration, 1);
-                        const eased = 1 - Math.pow(1 - progress, 3);
-                        const current = Math.floor(eased * target);
-                        counter.textContent = current + suffix;
-                        if (progress < 1) requestAnimationFrame(update);
-                        else counter.textContent = target + suffix;
+        // ── Animated Counters ──
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter');
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const suffix = counter.getAttribute('data-suffix') || '';
+                const duration = 2000;
+                const startTime = performance.now();
+                function update(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const current = Math.floor(eased * target);
+                    counter.textContent = current + suffix;
+                    if (progress < 1) requestAnimationFrame(update);
+                    else counter.textContent = target + suffix;
+                }
+                requestAnimationFrame(update);
+            });
+        }
+        const statsSection = document.querySelector('.stats-bar');
+        if (statsSection) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animateCounters();
+                        observer.unobserve(entry.target);
                     }
-                    requestAnimationFrame(update);
                 });
-            }
-            const statsSection = document.querySelector('.stats-bar');
-            if (statsSection) {
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            animateCounters();
-                            observer.unobserve(entry.target);
-                        }
+            }, { threshold: 0.5 });
+            observer.observe(statsSection);
+        }
+
+        // ── Replay Demo ──
+        function replayDemo() {
+            const rows = document.querySelectorAll('#sqlTableBody tr');
+            rows.forEach((row, i) => {
+                row.style.animation = 'none';
+                row.style.opacity = '0';
+                void row.offsetHeight;
+                row.style.animation = `rowIn 0.3s ease forwards`;
+                row.style.animationDelay = (0.3 + i * 0.2) + 's';
+            });
+            const btn = event.currentTarget;
+            btn.style.pointerEvents = 'none';
+            setTimeout(() => { btn.style.pointerEvents = 'auto'; }, 3000);
+        }
+
+        // ── Terminal command typing effect ──
+        (function typeCommand() {
+            const cmdSpan = document.querySelector('.terminal-cmd .cmd');
+            if (!cmdSpan) return;
+            const fullCmd = cmdSpan.textContent;
+            cmdSpan.textContent = '';
+            let i = 0;
+            function type() {
+                if (i < fullCmd.length) {
+                    cmdSpan.textContent += fullCmd.charAt(i);
+                    i++;
+                    setTimeout(type, 25 + Math.random() * 20);
+                } else {
+                    const rows = document.querySelectorAll('#sqlTableBody tr');
+                    rows.forEach((row, idx) => {
+                        row.style.animation = `rowIn 0.3s ease forwards`;
+                        row.style.animationDelay = (0.3 + idx * 0.25) + 's';
                     });
-                }, { threshold: 0.5 });
-                observer.observe(statsSection);
-            }
-
-            // ── Replay Demo ──
-            function replayDemo() {
-                const rows = document.querySelectorAll('#sqlTableBody tr');
-                rows.forEach((row, i) => {
-                    row.style.animation = 'none';
-                    row.style.opacity = '0';
-                    void row.offsetHeight;
-                    row.style.animation = `rowIn 0.3s ease forwards`;
-                    row.style.animationDelay = (0.3 + i * 0.2) + 's';
-                });
-                const btn = event.currentTarget;
-                btn.style.pointerEvents = 'none';
-                setTimeout(() => { btn.style.pointerEvents = 'auto'; }, 3000);
-            }
-
-            // ── Terminal command typing effect ──
-            (function typeCommand() {
-                const cmdSpan = document.querySelector('.terminal-cmd .cmd');
-                if (!cmdSpan) return;
-                const fullCmd = cmdSpan.textContent;
-                cmdSpan.textContent = '';
-                let i = 0;
-                function type() {
-                    if (i < fullCmd.length) {
-                        cmdSpan.textContent += fullCmd.charAt(i);
-                        i++;
-                        setTimeout(type, 25 + Math.random() * 20);
-                    } else {
-                        const rows = document.querySelectorAll('#sqlTableBody tr');
-                        rows.forEach((row, idx) => {
-                            row.style.animation = `rowIn 0.3s ease forwards`;
-                            row.style.animationDelay = (0.3 + idx * 0.25) + 's';
-                        });
-                    }
                 }
-                setTimeout(type, 400);
-            })();
+            }
+            setTimeout(type, 400);
+        })();
 
-            // ── LIVE DEMO SIMULATION ──
+        // ── LIVE DEMO SIMULATION ──
             const demoQueries = [
-                { pid: 87342, user: 'app_user', db: 'PG', status: 'active', duration: 2.3, query: 'SELECT u.id, u.name, o.total FROM users u JOIN orders o …' },
-                { pid: 87341, user: 'replicator', db: 'PG', status: 'idle', duration: 15.8, query: "COPY analytics_events FROM '/data/export.csv'" },
-                { pid: 87338, user: 'ml_user', db: 'PG', status: 'active', duration: 8.1, query: 'WITH features AS (SELECT …) UPDATE predictions SET score = …' },
-                { pid: 87335, user: 'analytics', db: 'MY', status: 'locked', duration: 22.7, query: 'UPDATE inventory SET quantity = quantity - 1 WHERE id = …' },
-                { pid: 87330, user: 'etl_user', db: 'CH', status: 'active', duration: 45.2, query: 'SELECT toDate(timestamp), count(*), uniq(user_id) FROM events …' },
-                { pid: 87328, user: 'app_user', db: 'PG', status: 'idle', duration: 0.4, query: 'COMMIT' },
-                { pid: 87295, user: 'batch_user', db: 'PG', status: 'error', duration: 120.0, query: 'SELECT pg_sleep(120) — killed' },
+                { pid: 87342, user: 'app_user', db: 'PG', status: 'active', duration: 2.3, waitEvent: 'ClientRead', query: 'SELECT u.id, u.name, o.total FROM users u JOIN orders o ON u.id = o.user_id WHERE o.total > 1000 ORDER BY o.total DESC LIMIT 50' },
+                { pid: 87341, user: 'replicator', db: 'PG', status: 'idle', duration: 15.8, waitEvent: '—', query: "COPY analytics_events FROM '/data/export.csv'" },
+                { pid: 87338, user: 'ml_user', db: 'PG', status: 'active', duration: 8.1, waitEvent: 'ExtendedQuery', query: 'WITH features AS (SELECT user_id, count(*) as cnt, avg(score) as avg_score FROM events GROUP BY user_id) UPDATE predictions SET score = features.avg_score FROM features WHERE predictions.user_id = features.user_id' },
+                { pid: 87335, user: 'analytics', db: 'MY', status: 'locked', duration: 22.7, waitEvent: 'Lock', query: 'UPDATE inventory SET quantity = quantity - 1 WHERE product_id = 1047 AND warehouse_id = 3' },
+                { pid: 87330, user: 'etl_user', db: 'CH', status: 'active', duration: 45.2, waitEvent: 'IO', query: 'SELECT toDate(event_date) as day, count(*), uniq(user_id) FROM analytics.events WHERE event_date >= today() - 7 GROUP BY day ORDER BY day' },
+                { pid: 87328, user: 'app_user', db: 'PG', status: 'idle', duration: 0.4, waitEvent: '—', query: 'COMMIT' },
+                { pid: 87295, user: 'batch_user', db: 'PG', status: 'error', duration: 120.0, waitEvent: 'PgSleep', query: 'SELECT pg_sleep(120) — killed' },
             ];
             const statuses = ['active', 'idle', 'active', 'locked'];
-            const statusColors = { active: 'var(--accent-green)', idle: 'var(--text-muted)', locked: 'var(--accent-orange)', error: 'var(--accent-red)' };
+            const statusColors = { active: 'var(--accent-green)', idle: 'var(--text-muted)', 'idle-in-txn': 'var(--accent-yellow)', locked: 'var(--accent-orange)', error: 'var(--accent-red)' };
+            const waitEventColors = {
+                ClientRead: 'client-read', ExtendedQuery: 'extended', Lock: 'lock', IO: 'io', PgSleep: 'pg-sleep', Transaction: 'transaction',
+            };
             // ── Delta & uptime tracking ──
             let deltaNew = 0, deltaDone = 0;
             let prevCounts = { active: 4, idle: 2, blocked: 1, error: 1 };
@@ -2187,6 +2268,11 @@
                 updateFooterStats();
             }
 
+            function updateWaitEvent(td, eventName) {
+                const cls = waitEventColors[eventName];
+                td.innerHTML = '<span class="wait-event' + (cls ? ' ' + cls : '') + '">' + eventName + '</span>';
+            }
+
             function simulateTick() {
                 const rows = document.querySelectorAll('#sqlTableBody tr');
                 const tbody = document.getElementById('sqlTableBody');
@@ -2194,7 +2280,7 @@
                 // 1. Update durations for active/locked rows
                 rows.forEach(row => {
                     const badge = row.querySelector('.status-badge');
-                    const durTd = row.cells ? row.cells[5] : null;
+                    const durTd = row.cells ? row.cells[6] : null;
                     if (!badge || !durTd) return;
                     const s = badge.textContent.trim();
                     const pid = parseInt(row.querySelector('.pid')?.textContent || '0');
@@ -2207,14 +2293,17 @@
                     }
                 });
 
-                // 2. Random status changes
-                if (Math.random() < 0.15) {
-                    const candidate = rows[Math.floor(Math.random() * Math.min(rows.length, 5))];
+                // 2. Random status changes (including idle-in-txn)
+                if (Math.random() < 0.18) {
+                    const candidate = rows[Math.floor(Math.random() * Math.min(rows.length, 6))];
                     const badge = candidate?.querySelector('.status-badge');
                     if (badge) {
                         const s = badge.textContent.trim();
-                        if (s === 'active') changeStatus(candidate, 'idle');
-                        else if (s === 'idle') changeStatus(candidate, 'active');
+                        const r = Math.random();
+                        if (s === 'active' && r < 0.4) changeStatus(candidate, 'idle');
+                        else if (s === 'active' && r < 0.6) changeStatus(candidate, 'idle-in-txn');
+                        else if (s === 'idle' && r < 0.5) changeStatus(candidate, 'active');
+                        else if (s === 'idle-in-txn' && r < 0.5) changeStatus(candidate, 'idle');
                     }
                 }
 
@@ -2227,11 +2316,26 @@
                     showNotification('🔓 Lock released — PID ' + lockedRow.querySelector('.pid')?.textContent, 'unlock');
                 }
 
+                // 3b. Random wait_event change on active rows
+                if (Math.random() < 0.12) {
+                    const candidate = rows[Math.floor(Math.random() * Math.min(rows.length, 5))];
+                    const weTd = candidate?.cells ? candidate.cells[5] : null;
+                    const pid = parseInt(candidate?.querySelector('.pid')?.textContent || '0');
+                    const q = demoQueries.find(q => q.pid === pid);
+                    if (weTd && q && q.status === 'active') {
+                        const events = ['ClientRead', 'ExtendedQuery', 'IO', 'Lock'];
+                        const newEvent = events[Math.floor(Math.random() * events.length)];
+                        q.waitEvent = newEvent;
+                        updateWaitEvent(weTd, newEvent);
+                    }
+                }
+
                 // 4. Random new query arrival (rare)
                 if (Math.random() < 0.06 && rows.length < 10) {
                     const newPid = 87300 + Math.floor(Math.random() * 100);
                     const users = ['dev_user', 'reporting', 'analytics', 'batch_user', 'app_user'];
                     const dbs = ['PG', 'PG', 'MY', 'CH'];
+                    const waitEvents = ['ClientRead', 'ExtendedQuery', 'IO'];
                     const queries = [
                         'SELECT * FROM large_table WHERE date > now() - interval 1h',
                         'REFRESH MATERIALIZED VIEW CONCURRENTLY daily_metrics',
@@ -2244,7 +2348,9 @@
                     const qtext = queries[Math.floor(Math.random() * queries.length)];
                     const dur = 0.5 + Math.random() * 5;
                     const status = Math.random() < 0.7 ? 'active' : 'idle';
-                    demoQueries.push({ pid: newPid, user, db, status, duration: dur, query: qtext });
+                    const we = status === 'active' ? waitEvents[Math.floor(Math.random() * waitEvents.length)] : '—';
+                    const weCls = waitEventColors[we] || '';
+                    demoQueries.push({ pid: newPid, user, db, status, duration: dur, waitEvent: we, query: qtext });
 
                     const tr = document.createElement('tr');
                     tr.setAttribute('onclick', `showExplain(this, ${newPid})`);
@@ -2256,6 +2362,7 @@
                         <td>${user}</td>
                         <td><span class="db-badge ${db.toLowerCase() === 'pg' ? 'pg' : db.toLowerCase() === 'my' ? 'mysql' : 'ch'}">${db}</span></td>
                         <td><span class="status-badge ${status}">${status}</span></td>
+                        <td><span class="wait-event${weCls ? ' ' + weCls : ''}">${we}</span></td>
                         <td>${formatDuration(dur)}</td>
                         <td><span class="query-text"><span class="keyword">${qtext.split(' ')[0]}</span> ${qtext.split(' ').slice(1).join(' ')}</span></td>
                     `;
@@ -2306,13 +2413,13 @@
                 // Reset all demo data
                 demoQueries.length = 0;
                 demoQueries.push(
-                    { pid: 87342, user: 'app_user', db: 'PG', status: 'active', duration: 2.3, query: 'SELECT u.id, u.name, o.total FROM users u JOIN orders o …' },
-                    { pid: 87341, user: 'replicator', db: 'PG', status: 'idle', duration: 15.8, query: "COPY analytics_events FROM '/data/export.csv'" },
-                    { pid: 87338, user: 'ml_user', db: 'PG', status: 'active', duration: 8.1, query: 'WITH features AS (SELECT …) UPDATE predictions SET score = …' },
-                    { pid: 87335, user: 'analytics', db: 'MY', status: 'locked', duration: 22.7, query: 'UPDATE inventory SET quantity = quantity - 1 WHERE id = …' },
-                    { pid: 87330, user: 'etl_user', db: 'CH', status: 'active', duration: 45.2, query: 'SELECT toDate(timestamp), count(*), uniq(user_id) FROM events …' },
-                    { pid: 87328, user: 'app_user', db: 'PG', status: 'idle', duration: 0.4, query: 'COMMIT' },
-                    { pid: 87295, user: 'batch_user', db: 'PG', status: 'error', duration: 120.0, query: 'SELECT pg_sleep(120) — killed' },
+                    { pid: 87342, user: 'app_user', db: 'PG', status: 'active', duration: 2.3, waitEvent: 'ClientRead', query: 'SELECT u.id, u.name, o.total FROM users u JOIN orders o ON u.id = o.user_id WHERE o.total > 1000 ORDER BY o.total DESC LIMIT 50' },
+                    { pid: 87341, user: 'replicator', db: 'PG', status: 'idle', duration: 15.8, waitEvent: '—', query: "COPY analytics_events FROM '/data/export.csv'" },
+                    { pid: 87338, user: 'ml_user', db: 'PG', status: 'active', duration: 8.1, waitEvent: 'ExtendedQuery', query: 'WITH features AS (SELECT user_id, count(*) as cnt, avg(score) as avg_score FROM events GROUP BY user_id) UPDATE predictions SET score = features.avg_score FROM features WHERE predictions.user_id = features.user_id' },
+                    { pid: 87335, user: 'analytics', db: 'MY', status: 'locked', duration: 22.7, waitEvent: 'Lock', query: 'UPDATE inventory SET quantity = quantity - 1 WHERE product_id = 1047 AND warehouse_id = 3' },
+                    { pid: 87330, user: 'etl_user', db: 'CH', status: 'active', duration: 45.2, waitEvent: 'IO', query: 'SELECT toDate(event_date) as day, count(*), uniq(user_id) FROM analytics.events WHERE event_date >= today() - 7 GROUP BY day ORDER BY day' },
+                    { pid: 87328, user: 'app_user', db: 'PG', status: 'idle', duration: 0.4, waitEvent: '—', query: 'COMMIT' },
+                    { pid: 87295, user: 'batch_user', db: 'PG', status: 'error', duration: 120.0, waitEvent: 'PgSleep', query: 'SELECT pg_sleep(120) — killed' },
                 );
                 document.getElementById('explainPopup').classList.remove('show');
                 origReplay();
